@@ -1,0 +1,51 @@
+# 工具痕迹
+.codex
+.codex/
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# Conda
+.conda/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 数据与产物(由 runbook 规划,不入库)
+data/
+mlruns/
+mlartifacts/
+checkpoints/
+outputs/
+logs/
+*.parquet
+*.csv
+*.npz
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
