@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 from src.data.constants import (
     TRAIN_CSV, TEST_CSV, SERIES_TRAIN_DIR, SERIES_TEST_DIR,
-    ID_COL, TARGET_COL
+    ID_COL, TARGET_COL, LEAKAGE_COL_PREFIXES
 )
 from src.utils.logging import get_logger
 
@@ -168,14 +168,72 @@ def validate_data_integrity(df: pd.DataFrame, is_train: bool = True) -> bool:
         raise ValueError(f"Found {n_duplicates} duplicate IDs")
 
     # Check target values (if training data)
+    # NOTE: PIU's `sii` target legitimately contains NaN for ~31% of participants
+    # (label/actigraphy missingness is a known dataset characteristic, see v2 doc O13).
+    # NaN labels are valid here; only non-NaN values must fall in {0, 1, 2, 3}.
     if is_train:
-        invalid_targets = ~df[TARGET_COL].isin([0, 1, 2, 3])
+        labeled = df[TARGET_COL].dropna()
+        invalid_targets = ~labeled.isin([0, 1, 2, 3])
         if invalid_targets.any():
-            n_invalid = invalid_targets.sum()
+            n_invalid = int(invalid_targets.sum())
             raise ValueError(
                 f"Found {n_invalid} invalid target values. "
-                "Expected values: 0, 1, 2, 3"
+                "Expected values: 0, 1, 2, 3 (or NaN)"
+            )
+
+        n_missing = int(df[TARGET_COL].isna().sum())
+        if n_missing > 0:
+            logger.warning(
+                f"{n_missing}/{len(df)} ({n_missing/len(df)*100:.1f}%) samples "
+                f"have missing '{TARGET_COL}' labels (expected for PIU)"
             )
 
     logger.info("Data integrity validation passed")
     return True
+
+
+def get_leakage_columns(df: pd.DataFrame) -> list:
+    """
+    Identify label-leakage columns that must be excluded from features.
+
+    The PIU `sii` target is derived by binning `PCIAT-PCIAT_Total`, so every
+    PCIAT-* column perfectly encodes the answer. These must never be used as
+    model inputs. See src/data/constants.py LEAKAGE_COL_PREFIXES.
+
+    Args:
+        df: DataFrame to inspect
+
+    Returns:
+        List of column names that leak the target
+    """
+    leakage_cols = [
+        col for col in df.columns
+        if any(col.startswith(prefix) for prefix in LEAKAGE_COL_PREFIXES)
+    ]
+
+    if leakage_cols:
+        logger.info(
+            f"Identified {len(leakage_cols)} label-leakage columns to exclude "
+            f"(prefixes={LEAKAGE_COL_PREFIXES})"
+        )
+
+    return leakage_cols
+
+
+def get_feature_columns(df: pd.DataFrame, is_train: bool = True) -> list:
+    """
+    Get the list of valid feature columns (excluding ID, target, and leakage).
+
+    Args:
+        df: DataFrame to inspect
+        is_train: Whether this is training data (excludes TARGET_COL)
+
+    Returns:
+        List of usable feature column names
+    """
+    exclude = set(get_leakage_columns(df)) | {ID_COL}
+    if is_train:
+        exclude.add(TARGET_COL)
+
+    feature_cols = [col for col in df.columns if col not in exclude]
+    return feature_cols

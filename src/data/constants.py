@@ -46,6 +46,26 @@ SII_CLASSES = {
 NUM_CLASSES = len(SII_CLASSES)
 
 # ============================================================================
+# Label Leakage Columns (CRITICAL — must be excluded from features)
+# ============================================================================
+# The `sii` target is derived DIRECTLY by binning `PCIAT-PCIAT_Total`:
+#   sii=0 <- Total in [0, 30],  sii=1 <- [31, 49],
+#   sii=2 <- [50, 79],          sii=3 <- [80, 100]
+# Therefore ALL PCIAT-* columns (20 item scores + Total + Season) are perfect
+# predictors of the label and MUST be dropped from any feature set, or the model
+# "predicts the answer from the answer" and collapses on the real test set.
+# This is the single most common trap in this competition.
+LEAKAGE_COL_PREFIXES = ["PCIAT"]
+
+# Official SII binning thresholds (for reconstructing labels if ever needed)
+SII_BIN_EDGES = {
+    0: (0, 30),
+    1: (31, 49),
+    2: (50, 79),
+    3: (80, 100),
+}
+
+# ============================================================================
 # Data Schema
 # ============================================================================
 # Expected dtypes for train.csv
