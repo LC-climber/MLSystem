@@ -2,6 +2,7 @@
 .codex
 .codex/
 .claude/
+.codegraph/
 
 # Python
 __pycache__/

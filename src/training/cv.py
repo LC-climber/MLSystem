@@ -61,6 +61,8 @@ def run_cv(
     seed: int = SEED,
     preprocess: bool = True,
     measure_system: bool = True,
+    latency_warmup: int = 20,
+    latency_iters: int = 200,
 ) -> Dict[str, Any]:
     """
     Run 5-fold CV for one model across all folds.
@@ -73,6 +75,9 @@ def run_cv(
         seed: Random seed (re-applied each fold for reproducibility)
         preprocess: If True, fit impute+scale on train fold and transform
         measure_system: If True, collect system metrics (latency, size)
+        latency_warmup: Warmup calls before timing inference latency
+        latency_iters: Timed single-row predict calls (Spark passes a small value —
+            each call is a full Spark job, so 200 would dominate wall-clock)
 
     Returns:
         {'model_name', 'per_fold': [...], 'summary': {...}}
@@ -119,7 +124,7 @@ def run_cv(
             fold_metrics["peak_rss_gb"] = get_peak_rss_gb()
             try:
                 fold_metrics["inference_latency_us"] = measure_inference_latency(
-                    model.predict, X_val[:1], n_warmup=20, n_iterations=200
+                    model.predict, X_val[:1], n_warmup=latency_warmup, n_iterations=latency_iters
                 )
             except Exception:
                 fold_metrics["inference_latency_us"] = float("nan")

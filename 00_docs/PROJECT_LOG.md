@@ -533,6 +533,8 @@ python -c "from src.utils.reproducibility import verify_reproducibility; verify_
 - **2026-05-29 14:35**: W2 切分协议 — 生成 `stratified_group_kfold_seed42.csv` (2736 有标签样本, 5 折, 分层均衡, 无泄漏)
 - **2026-05-29 14:38**: W2 feat_v1_tabular — 生成 `feat_v1__seed42.parquet` (3960×100, 58→98 编码特征, 数值列 NaN 留待按折填补)
 - **2026-05-29 14:42**: W2 端到端打通 — sklearn LR 在 fold 0 跑出首个 baseline:**Macro-F1=0.368 / QWK=0.376 / BalAcc=0.420**。QWK 远离 1.0 佐证 PCIAT 泄漏已正确排除
+- **2026-05-29 18:13**: W2 Spark 接入 — 修复 Java 21 / Python 3.12 两处环境不兼容(`src/utils/spark.py` 自动锁定 Java 8 + conda python);Spark LR fold0 ≈ sklearn,验证通过
+- **2026-05-29 18:19**: W2 三系统对比表 1 完成 — sklearn/Spark/PyTorch × LR/MLP × 5-fold 全跑通(0 报错),结果写 `reports/p1_systemwise_feat_v1.csv` 并记入 MLflow。Spark 训练慢 30–100×、推理慢 ~1000×,印证"训练阶段 Spark 必输"
 
 ---
 
@@ -590,6 +592,44 @@ python -c "from src.utils.reproducibility import verify_reproducibility; verify_
 
 ---
 
+## W2 Spark 接入:两个兼容性坑 + 三系统对比表 1 (2026-05-29)
+
+### 踩坑:Spark 3.5 连环兼容性问题
+
+接入 Spark MLlib baseline 时,连续撞到两个**环境层**不兼容(都与模型无关):
+
+1. **Java 版本** 🚨:系统默认 `java` 是 OpenJDK **21**,而 Spark 3.5 只支持 Java **8/11/17**(Java 21 要 Spark 4.0)。表现为 SparkSession 启动即崩。
+   - 修复:`src/utils/spark.py::pin_java_home()` 自动探测并把 `JAVA_HOME` 指向兼容 JDK(本机已装 Java 8 `1.8.0_492`,无需安装;可用 `MLSYS_JAVA_HOME` 覆盖为 17)。
+2. **Python 版本** 🚨:Spark worker 默认用系统 `python3`(Ubuntu 24.04 = **3.12**),而 driver 是 conda `openpi_311` = **3.11**,每个 job 报 `PYTHON_VERSION_MISMATCH`。
+   - 修复:`pin_worker_python()` 把 `PYSPARK_PYTHON`/`PYSPARK_DRIVER_PYTHON` 锁到 `sys.executable`。
+
+两处都在 `src/utils/spark.py` import 时自动生效,**无需在 shell 里 export 任何东西**。所有 Spark 代码统一走 `get_spark_session()`(单例,JVM 只启一次,跨 fold/模型复用)。
+
+### 新增文件
+- `src/utils/spark.py` — Java/Python 双锁定 + 缓存 SparkSession
+- `src/models/spark_baselines.py` — `SparkLogisticRegression`(多分类 + balanced weightCol)/ `SparkMLP`(MLlib MLP,无 class weight,系统差异)
+- `src/experiments/run_p1_systemwise.py` — 三系统统一跑 `run_cv`,输出对比表 1 + 写 `reports/p1_systemwise_feat_v1.csv` + 记 MLflow
+- `src/training/cv.py` — `run_cv` 新增 `latency_warmup/latency_iters`(Spark 单行 predict 是整个 job,200 次会拖垮)
+
+### 对比表 1(feat_v1,5-fold 均值;6 个配置 0 报错,已记入 MLflow `piu-p1-systemwise`)
+
+| system  | algo | Macro-F1 | QWK   | BalAcc | train(s) | infer(µs) |
+|---------|------|----------|-------|--------|----------|-----------|
+| sklearn | LR   | 0.362    | 0.365 | 0.404  | 8.6      | 45        |
+| sklearn | MLP  | 0.303    | 0.285 | 0.309  | 0.2      | 125       |
+| spark   | LR   | 0.362    | 0.360 | 0.399  | 22.6     | 145,000   |
+| spark   | MLP  | 0.300    | 0.249 | 0.300  | 4.3      | 135,000   |
+| pytorch | LR   | 0.347    | 0.335 | 0.419  | 0.7      | 58        |
+| pytorch | MLP  | 0.343    | 0.348 | 0.439  | 0.1      | 82        |
+
+**关键结论(正中方案论点)**:
+- **质量**:spark_lr ≈ sklearn_lr(Macro-F1 0.362 几乎完全一致)→ 证明跨系统对比公平、实现正确。
+- **训练耗时**:Spark 比 sklearn/pytorch 慢 **30–100×**(2736 行小数据,Spark 启动/调度开销远大于收益)。
+- **推理延迟**:Spark 单行 ~**135–145 ms**,比 sklearn/pytorch 慢 **~1000–3000×**(每次 predict 都是一个完整 Spark job)。
+- → 印证 `03_plan_p1_v2` 核心论点:**训练阶段 Spark 必输给单机;Spark 的价值在特征/ETL 阶段(feat_v2 actigraphy)**,正是下一步。
+
+---
+
 ## 下次启动项目时的检查清单
 
 ```bash
@@ -618,6 +658,6 @@ bash scripts/check_disk.sh
 
 ---
 
-**最后更新**: 2026-05-29 14:42
-**当前阶段**: W2 进行中 — 切分协议 + feat_v1 就绪,数据 pipeline 端到端打通 (首个 baseline 已出)
-**下一步**: 数据探索与 W2 特征工程
+**最后更新**: 2026-05-29 18:19
+**当前阶段**: W2 — 三系统(sklearn/Spark/PyTorch)feat_v1 对比表 1 已完成;Spark 环境打通
+**下一步**: feat_v2 actigraphy 滑窗统计(pandas 版 + Spark 版两路对比)— Spark 的核心价值试验场
