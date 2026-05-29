@@ -530,6 +530,9 @@ python -c "from src.utils.reproducibility import verify_reproducibility; verify_
 - **2026-05-29 13:00**: 创建项目日志文档
 - **2026-05-29 13:41**: 数据下载完成 (6.3 GB),解压成功
 - **2026-05-29 14:02**: 数据加载测试通过;发现并处理两个关键数据特性 (见下方"关键数据发现")
+- **2026-05-29 14:35**: W2 切分协议 — 生成 `stratified_group_kfold_seed42.csv` (2736 有标签样本, 5 折, 分层均衡, 无泄漏)
+- **2026-05-29 14:38**: W2 feat_v1_tabular — 生成 `feat_v1__seed42.parquet` (3960×100, 58→98 编码特征, 数值列 NaN 留待按折填补)
+- **2026-05-29 14:42**: W2 端到端打通 — sklearn LR 在 fold 0 跑出首个 baseline:**Macro-F1=0.368 / QWK=0.376 / BalAcc=0.420**。QWK 远离 1.0 佐证 PCIAT 泄漏已正确排除
 
 ---
 
@@ -615,6 +618,6 @@ bash scripts/check_disk.sh
 
 ---
 
-**最后更新**: 2026-05-29 14:02
-**当前阶段**: W1 完成,数据就绪 (已解压 + 验证)
+**最后更新**: 2026-05-29 14:42
+**当前阶段**: W2 进行中 — 切分协议 + feat_v1 就绪,数据 pipeline 端到端打通 (首个 baseline 已出)
 **下一步**: 数据探索与 W2 特征工程

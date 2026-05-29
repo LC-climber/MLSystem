@@ -5,8 +5,7 @@ Defines all data-related constants including column names, class mappings,
 and data paths for the PIU (Problematic Internet Use) dataset.
 """
 
-from pathlib import Path
-from src.config import DATA_RAW_DIR, DATA_INTERIM_DIR, DATA_PROCESSED_DIR
+from src.config import DATA_RAW_DIR
 
 # ============================================================================
 # File Paths
@@ -44,6 +43,9 @@ SII_CLASSES = {
 }
 
 NUM_CLASSES = len(SII_CLASSES)
+
+# Ordered list of target class labels (for sklearn labels= / log_loss args)
+TARGET_CLASSES = list(SII_CLASSES.keys())  # [0, 1, 2, 3]
 
 # ============================================================================
 # Label Leakage Columns (CRITICAL — must be excluded from features)
