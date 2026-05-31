@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-05-31 — 环境方案落地校正(README / runbook / charter 对齐实现)
+
+修正实现与文档的矛盾:`README.md`、`v2/05_runbook_v2.md`、`v2/02_charter_v2.md` 仍写"三套 conda 环境(`mlsys_cpu/gpu_local/gpu_remote`)+ `setup_envs.sh`",而 2026-05-29 实际落地已改为**复用单一 `openpi_311` 环境**(PyTorch 2.9.0+cu128,原生支持 sm_120)。矛盾根因:`README.md`(05-29 12:24)写于环境决策(~12:30)之前,此后未回改。
+
+- `../README.md`:环境搭建 / 开发流程 / 环境说明 / 当前状态四处改为 openpi_311;当前状态更新到 W2(三系统对比表 1 已完成)。
+- `v2/05_runbook_v2.md`:顶部与 §2 加"实际落地变更"提示,TL;DR step 1 改为激活 openpi_311;§3 数据 / §4 MLflow / §5 磁盘 / §6 VRAM / §7 GPU fallback 仍有效。
+- `v2/02_charter_v2.md`:§2.2 环境矩阵下补落地变更注记。
+- 三套环境矩阵内容**保留**作设计依据与异机 / 多环境重建参考,不删除。
+- 环境真相单一来源:[`../envs/README.md`](../envs/README.md) + `PROJECT_LOG.md`。
+
+---
+
 ## 2026-05-15 — 文档库重组
 
 非内容性变更:目录结构调整,便于阅读与追溯。

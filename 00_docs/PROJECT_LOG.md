@@ -84,6 +84,8 @@ pip freeze > envs/pinned_openpi_311_mlsys.txt
 | MLflow | 2.17.0 | 2.17.0 | ✅ | 完全匹配 |
 | PySpark | 3.5.0 | 3.5.0 | ✅ | 完全匹配 |
 
+> 注:上表为 2026-05-29 配置当时的快照;numpy/pandas 后续已降级到项目要求档位(**实测 numpy 1.26.4 / pandas 2.3.3**)。当前准确版本以 [`../envs/README.md`](../envs/README.md) 版本表为准。
+
 ---
 
 ### Kaggle API 配置

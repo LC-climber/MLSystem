@@ -11,12 +11,14 @@
 
 ### 1. 环境搭建 (W0)
 
+> 本项目**复用现有的 `openpi_311` conda 环境**(已含 PyTorch 2.9.0+cu128,完整支持 RTX 5060 Ti 的 sm_120),**不再单独创建环境**。决策依据与完整依赖清单见 [`envs/README.md`](envs/README.md)。
+
 ```bash
 # 检查磁盘空间
 bash scripts/check_disk.sh
 
-# 创建 3 个 conda 环境 (~30 分钟)
-bash scripts/setup_envs.sh
+# 激活环境(已配置好,无需新建;异机重建见 envs/README.md)
+conda activate openpi_311
 
 # 配置 Kaggle API
 # 1. 访问 https://www.kaggle.com/settings
@@ -34,10 +36,9 @@ bash scripts/start_mlflow.sh &
 ### 2. 开发流程
 
 ```bash
-# 激活环境
-conda activate mlsys_cpu  # 数据处理、Spark、sklearn
-# 或
-conda activate mlsys_gpu_local  # 本地 GPU 训练
+# 激活环境(单一环境,覆盖数据处理 / Spark / sklearn / PyTorch)
+conda activate openpi_311
+# 若已配置 direnv,cd 进项目目录会自动激活(见 .envrc)
 
 # 使用 Makefile
 make help           # 查看所有命令
@@ -86,9 +87,12 @@ make test           # 运行测试
 
 ## 环境说明
 
-- **mlsys_cpu**: Python 3.11 + sklearn + Spark + MLflow
-- **mlsys_gpu_local**: Python 3.11 + PyTorch 2.11 (或 nightly) + CUDA 12.8
-- **mlsys_gpu_remote**: Python 3.11 + PyTorch 2.11 stable (远程 4090)
+**单一环境 `openpi_311`(复用)**,覆盖单机 / 分布式 / 深度学习 / 部署全流程:
+
+- Python 3.11.14 + PyTorch 2.9.0+cu128(支持 RTX 5060 Ti sm_120)+ CUDA 12.8
+- sklearn 1.8 / PySpark 3.5 / MLflow 2.17 / CatBoost / LightGBM / Optuna / FastAPI
+
+> 早期规划的 `mlsys_cpu / mlsys_gpu_local / mlsys_gpu_remote` 三套环境矩阵(见 `00_docs/v2/02_charter_v2.md` §2.2、`05_runbook_v2.md` §2)**未采用**;复用 openpi_311 的原因见 [`envs/README.md`](envs/README.md)。
 
 ## 关键配置
 
@@ -116,11 +120,14 @@ make test           # 运行测试
 
 ## 当前状态
 
-**W0 环境搭建阶段** - 脚本和核心代码框架已就绪,等待:
-1. 运行 `bash scripts/setup_envs.sh` 创建环境
-2. 配置 Kaggle API 并下载数据
-3. 启动 MLflow 服务器
-4. 开始 W1 数据预处理开发
+**W2 阶段进行中** — 环境、数据 pipeline、切分协议、feat_v1 与三系统对比表 1 均已完成:
+
+- ✅ W0 环境:复用 `openpi_311`(见 [`envs/README.md`](envs/README.md))
+- ✅ W1 数据:加载 / 预处理 / 切分打通;已处理 `sii` 标签缺失与 PCIAT 标签泄漏
+- ✅ W2 对比表 1:sklearn / Spark / PyTorch × LR/MLP × 5-fold 全跑通,入 MLflow 与 `reports/p1_systemwise_feat_v1.csv`
+- 🚧 进行中:feat_v2 actigraphy 滑窗统计(pandas 版 + Spark 版对比)
+
+详细进度见 [`00_docs/PROJECT_LOG.md`](00_docs/PROJECT_LOG.md)。
 
 ## License
 

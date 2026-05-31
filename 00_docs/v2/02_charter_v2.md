@@ -72,6 +72,8 @@
 
 具体安装命令见 `05_runbook_v2.md`。
 
+> **落地变更(2026-05-29)**:上述三套环境矩阵为 2026-04 规划方案,**实际未采用**。落地改为**复用单一 `openpi_311` 环境**(Python 3.11.14 + PyTorch 2.9.0+cu128,已支持 sm_120,无需 nightly/stable 分流),原因与依赖清单见 [`../../envs/README.md`](../../envs/README.md) 与 [`../PROJECT_LOG.md`](../PROJECT_LOG.md)。本表保留作设计依据与异机 / 多环境重建参考。
+
 ### 2.3 关键版本事实(2026-04-18)
 
 - PyTorch stable **2.11.0** 已发布,PyPI 默认 wheel 为 `cu130`;`cu130` 不支持 sm_120。

@@ -8,11 +8,16 @@
   - `02_charter_v2.md` §2.2 给出环境矩阵抽象,本文档给具体命令
   - `03_plan_p1_v2.md` / `04_plan_p2_v2.md` 假定环境已就绪,本文档是前置依赖
 
+> **⚠️ 实际落地变更(2026-05-29):环境部分未按本手册执行。**
+> §0 step 1 与 §2 设计的"三套 conda 环境(`mlsys_cpu` / `mlsys_gpu_local` / `mlsys_gpu_remote`)+ `scripts/setup_envs.sh`"为 2026-04 规划方案,**实际未采用**。
+> 落地改为**复用现有 `openpi_311` 单环境**(已含 PyTorch 2.9.0+cu128,原生支持 sm_120),原因与依赖清单见 [`../../envs/README.md`](../../envs/README.md) 与 [`../PROJECT_LOG.md`](../PROJECT_LOG.md)。
+> 本手册 §3 数据 / §4 MLflow / §5 磁盘预算 / §6 VRAM / §7 GPU fallback **仍然有效**;§2 保留作异机重建与多环境规划参考。
+
 ## 0. TL;DR: 开机四步走
 
 ```bash
-# 1. 装三套 conda 环境(~30 min)
-bash scripts/setup_envs.sh     # 脚本内容见 §2.5
+# 1. 环境:实际复用 openpi_311(见上方"实际落地变更"),无需建三套环境
+conda activate openpi_311      # 异机重建见 envs/README.md
 
 # 2. 配置 Kaggle API + 下载数据(~1 h,取决于网速)
 bash scripts/fetch_data.sh     # 脚本内容见 §3.3
@@ -24,7 +29,7 @@ bash scripts/check_disk.sh     # 如果 >55 GiB,自动切 WISDM
 bash scripts/start_mlflow.sh   # http://localhost:5000
 ```
 
-四步完成后: 三个 conda 环境可用、`data/raw/` 有数据、MLflow UI 可访问。
+四步完成后: `openpi_311` 环境可用、`data/raw/` 有数据、MLflow UI 可访问。
 
 ## 1. 前置检查
 
@@ -77,6 +82,8 @@ java -version   # 需要 11 或 17
 若缺: `sudo apt install openjdk-17-jre-headless`
 
 ## 2. 环境搭建(Conda × 3)
+
+> ⚠️ **本节(三套环境 + `setup_envs.sh`)为规划方案,实际未采用**;落地复用 `openpi_311` 单环境,见本文件顶部说明与 [`../../envs/README.md`](../../envs/README.md)。下方内容保留作异机重建 / 多环境参考。
 
 ### 2.1 共用约定
 
