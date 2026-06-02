@@ -22,7 +22,9 @@
 | 类型 | 路径 | 说明 |
 |---|---|---|
 | 报告 Markdown | `00_docs/P1_MIDTERM_REPORT.md` | 按汇报叙事组织:问题、协议、Table 1、Table 2、A5、A6、结论与风险 |
-| PPTX | `reports/p1_midterm_slides.pptx` | 11 页,封面 + 10 页正文,可直接用于明天汇报 |
+| 讲稿提示 | `00_docs/P1_MIDTERM_TALK_TRACK.md` | 8-10 分钟逐页讲法、重点句和时间预算 |
+| 答辩 Q&A | `00_docs/P1_MIDTERM_QA.md` | Spark、feat_v2、A5/A6、公平性、P2 衔接等追问口径 |
+| PPTX | `reports/p1_midterm_slides.pptx` | 13 页,封面 + 10 页正文 + 2 页备用附录 |
 | 动画 HTML | `reports/p1_midterm_explainer.html` | 独立 HTML,带步骤切换/自动播放/数据包动画,解释 Spark 在特征/ETL 阶段的机制 |
 | PPT 构建脚本 | `scripts/build_p1_midterm_ppt.py` | 从 `reports/figures/` 重新生成 PPTX |
 
@@ -39,6 +41,8 @@
 9. 代表性混淆矩阵:类别 3 是指标不稳定来源
 10. 汇报主线:Spark 价值在哪里
 11. 结论与下一步
+12. Appendix A:答辩 Q&A 速记
+13. Appendix B:复现命令与材料路径
 
 ### HTML 动画页
 
@@ -59,14 +63,14 @@
 ### 验证
 
 - `python scripts/build_p1_midterm_ppt.py` 成功生成 PPTX。
-- 使用 `python-pptx` 回读 `reports/p1_midterm_slides.pptx`,确认 11 页。
+- 使用 `python-pptx` 回读 `reports/p1_midterm_slides.pptx`,确认 13 页。
 - HTML 引用的 6 张 SVG 图均存在。
 - `python -m compileall -q src scripts` 通过。
 
 ### 当前进度同步
 
-- P1 中期汇报材料已可直接使用。
-- 下一步可选:若明天前还要增强,优先补一页"讲稿提示/答辩 Q&A";否则建议暂停 P1 新实验,转为演练汇报。
+- P1 中期汇报材料已可直接使用,并已补讲稿提示与答辩 Q&A。
+- 下一步建议暂停 P1 新实验,转为演练汇报。
 
 ---
 

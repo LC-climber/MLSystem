@@ -28,7 +28,7 @@
 | W3 A5 actigraphy 覆盖率分析 | 已完成 | `reports/p1_ablation_a5_coverage.csv`;`reports/p1_ablation_a5_fold_coverage.csv` |
 | W3 A6 Spark 并行度扫描 | 已完成 | `reports/p1_spark_parallelism_feat_v2.csv`;`local[4]/[8]/[20]` 均等价,但并行度越高越慢且更耗内存 |
 | W3 核心可视化 | 已完成 | `reports/figures/`;Table 2 指标、系统开销、A5 覆盖率、A6 并行度、代表性混淆矩阵、lineage |
-| P1 中期汇报材料 | 已完成 | `00_docs/P1_MIDTERM_REPORT.md`;`reports/p1_midterm_slides.pptx`;`reports/p1_midterm_explainer.html` |
+| P1 中期汇报材料 | 已完成 | 报告、讲稿、Q&A、13 页 PPTX、动画 HTML 均已完成 |
 | W3 其余消融 | 待开始 | A1-A4;`feat_v3_fusion` 可选 |
 
 ---
@@ -165,12 +165,14 @@ actigraphy 子集 5-fold 风险:
 | 类型 | 路径 | 说明 |
 |---|---|---|
 | 报告 Markdown | `00_docs/P1_MIDTERM_REPORT.md` | 完整叙事、实验协议、关键表、A5/A6、讲稿建议 |
-| PPTX | `reports/p1_midterm_slides.pptx` | 11 页,封面 + 10 页正文,复用 W3 图件 |
+| 讲稿提示 | `00_docs/P1_MIDTERM_TALK_TRACK.md` | 8-10 分钟逐页讲法与时间预算 |
+| 答辩 Q&A | `00_docs/P1_MIDTERM_QA.md` | Spark、feat_v2、A5/A6、公平性、P2 衔接等追问口径 |
+| PPTX | `reports/p1_midterm_slides.pptx` | 13 页,封面 + 10 页正文 + 2 页附录 |
 | 动画 HTML | `reports/p1_midterm_explainer.html` | 单文件 HTML,含步骤动画、自动播放、图件讲解 |
 | PPT 构建脚本 | `scripts/build_p1_midterm_ppt.py` | 可从 figures 重新生成 PPTX |
 
 验证:
-- PPTX 回读成功,共 11 页,文件大小约 474KB。
+- PPTX 回读成功,共 13 页,文件大小约 477KB。
 - HTML 引用的 6 张 SVG 图均存在。
 - `python -m compileall -q src scripts` 通过。
 - 为生成 PPT 新增 `python-pptx==1.0.2`,并已补入 `envs/pinned_openpi_311_mlsys.txt`。

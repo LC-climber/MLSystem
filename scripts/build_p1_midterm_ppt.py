@@ -280,6 +280,42 @@ def build():
     ], size=15.5, color=MUTED)
     slides.append(s)
 
+    s = _blank(prs)
+    _title(s, "Appendix A:答辩 Q&A 速记")
+    _bullets(s, 0.85, 1.3, 5.8, 4.9, [
+        "为什么 Spark 没赢? 小表格训练/单样本推理阶段调度开销大。",
+        "为什么仍说 Spark 价值在 ETL? actigraphy 有约 3.15 亿行,特征阶段才有大数据量。",
+        "为什么 feat_v2 没提升? 有标签样本 actigraphy 覆盖率只有 36.4%,fold 4 子集无 class 3。",
+        "为什么不用 actigraphy 子集替代主表? 样本协议改变,类别更稀疏,只能作补充分析。",
+    ], size=15.5)
+    _bullets(s, 7.0, 1.3, 5.4, 4.9, [
+        "A6 为什么越并行越慢? 瓶颈更像 shuffle/序列化/Python worker 调度和尾部任务。",
+        "公平性怎么保证? 同 feature、fold、seed、预处理;imputer/scaler 只在训练 fold fit。",
+        "P2 怎么衔接? 选择稳定低延迟模型,做注册、服务化、监控和发布。",
+        "完整回答见:00_docs/P1_MIDTERM_QA.md",
+    ], size=15.5, color=MUTED)
+    slides.append(s)
+
+    s = _blank(prs)
+    _title(s, "Appendix B:复现命令与材料路径")
+    _bullets(s, 0.85, 1.25, 5.8, 4.95, [
+        "Table 1: python -m src.experiments.run_p1_feature_stage --mlflow",
+        "Table 2: python -m src.experiments.run_p1_systemwise --feature v2 --mlflow",
+        "A5: python -m src.experiments.run_p1_ablation_a5_coverage",
+        "A6: python -m src.experiments.run_p1_spark_parallelism --mlflow",
+        "Figures: python -m src.experiments.run_p1_visualizations",
+        "PPT: python scripts/build_p1_midterm_ppt.py",
+    ], size=13.5)
+    _bullets(s, 7.0, 1.25, 5.45, 4.95, [
+        "报告:00_docs/P1_MIDTERM_REPORT.md",
+        "讲稿:00_docs/P1_MIDTERM_TALK_TRACK.md",
+        "Q&A:00_docs/P1_MIDTERM_QA.md",
+        "PPT:reports/p1_midterm_slides.pptx",
+        "HTML:reports/p1_midterm_explainer.html",
+        "图件:reports/figures/",
+    ], size=14.5, color=MUTED)
+    slides.append(s)
+
     for i, slide in enumerate(slides, 1):
         _footer(slide, i)
 

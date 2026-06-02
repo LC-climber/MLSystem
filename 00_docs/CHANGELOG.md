@@ -9,8 +9,10 @@
 面向 2026-06-04 汇报,将 P1 实验结果整理为文档、PPT 和动画 HTML。
 
 - 新增 `00_docs/P1_MIDTERM_REPORT.md`:中期汇报报告骨架,覆盖问题定义、实验协议、Table 1、Table 2、A5、A6、讲稿建议和风险边界。
+- 新增 `00_docs/P1_MIDTERM_TALK_TRACK.md`:8-10 分钟逐页讲稿提示。
+- 新增 `00_docs/P1_MIDTERM_QA.md`:答辩 Q&A 备忘,覆盖 Spark、feat_v2、A5/A6、公平性和 P2 衔接。
 - 新增 `scripts/build_p1_midterm_ppt.py`:使用 `python-pptx` 从 `reports/figures/` 生成 PPTX。
-- 新增 `reports/p1_midterm_slides.pptx`:11 页中期汇报 PPT。
+- 更新 `reports/p1_midterm_slides.pptx`:13 页中期汇报 PPT,含 2 页备用附录。
 - 新增 `reports/p1_midterm_explainer.html`:独立动画 HTML,用 6 步 pipeline 动画解释 Spark 在特征/ETL 阶段的作用与限制。
 - 更新 `envs/pinned_openpi_311_mlsys.txt`:补入 `python-pptx==1.0.2`、`lxml==6.1.1`、`xlsxwriter==3.2.9`。
 - 更新 `PROGRESS.md` 与 `PROJECT_LOG.md`:同步中期材料完成状态、验证记录和下一步建议。
