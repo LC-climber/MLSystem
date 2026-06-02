@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-03 — W3 A6 Spark 并行度扫描落地
+
+推进 P1 W3 的第一项消融 A6,把 Spark actigraphy 特征阶段从单点 `local[8]` 扩展为并行度扫描。
+
+- 新增 `src/experiments/run_p1_spark_parallelism.py`:扫描 `local[4]` / `local[8]` / `local[20]`,复用 Table 1 的进程树 RSS、逻辑 hash、NaN 感知 diff 与 MLflow fallback。
+- 新增 `reports/p1_spark_parallelism_feat_v2.csv`:三个 master 均完成且与 pandas reference 等价;`local[4]` 最快(115.48s / 12.42GB),`local[20]` 最慢且最耗内存(161.53s / 18.00GB)。
+- 更新 `PROGRESS.md`:当前阶段改为 W3,新增 A6 完成状态与结果摘要,待办收敛为 A1-A5 + 可视化。
+- 更新 `PROJECT_LOG.md`:追加 2026-06-03 A6 流水,记录命令、产物、指标、结论和下一步进度同步。
+
+---
+
 ## 2026-06-02 — P1 feat_v2 当前快照与流水更新
 
 围绕 P1 的 `feat_v2_biosensing` 收口,把文档状态从"actigraphy 未跑通"更新为"双路径已跑通、等价性已通过、Table 1 已固化、Table 2 待补齐"。

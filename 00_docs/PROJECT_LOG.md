@@ -11,6 +11,53 @@
 
 ---
 
+## 2026-06-03 - W3 A6:Spark 并行度扫描
+
+### 目标
+
+完成 P1 W3 消融 A6:对 `feat_v2` actigraphy Spark 特征阶段扫描 `local[4]` / `local[8]` / `local[20]`,判断本机 local mode 下增加并行度是否改善耗时。
+
+### 新增脚本
+
+新增 `src/experiments/run_p1_spark_parallelism.py`:
+- 复用 `run_p1_feature_stage.py` 的进程树 RSS 采样、逻辑 hash、NaN 感知等价性校验和 MLflow fallback。
+- 每完成一个 Spark master 即写一次 `reports/p1_spark_parallelism_feat_v2.csv`,避免长任务中断丢失已完成结果。
+- 失败时保留 `status=failed` 与 `error_message`,便于把 OOM/GC 等系统失败纳入报告。
+
+执行命令:
+
+```bash
+python -m src.experiments.run_p1_spark_parallelism \
+  --masters local[4],local[8],local[20] \
+  --mlflow
+```
+
+HTTP MLflow server 未运行时继续 fallback 到本地 `sqlite:///mlruns.db`;本次已写入 `spark_parallelism_local_4` / `local_8` / `local_20` runs。
+
+### 结果
+
+产物:`reports/p1_spark_parallelism_feat_v2.csv`。
+
+| Spark master | wall(s) | peak RSS(GB) | rows x cols | act rows | logical hash | 等价性 |
+|---|---:|---:|---|---:|---|---|
+| `local[4]` | 115.48 | 12.42 | 3960 x 147 | 996 | `5530ecc5f44fda5247629879523c3d38` | `max_abs_diff=5.68e-14`;NaN equal |
+| `local[8]` | 138.12 | 13.29 | 3960 x 147 | 996 | `5530ecc5f44fda5247629879523c3d38` | `max_abs_diff=1.14e-13`;NaN equal |
+| `local[20]` | 161.53 | 18.00 | 3960 x 147 | 996 | `5530ecc5f44fda5247629879523c3d38` | `max_abs_diff=1.14e-13`;NaN equal |
+
+### 结论
+
+- 三个并行度均与 pandas reference 等价,因此 A6 只比较系统资源/调度效果。
+- 当前 `groupBy(id).applyInPandas` 精确聚合路径在本机最佳为 `local[4]`;`local[8]` 与 `local[20]` 反而更慢。
+- `local[20]` 相比 `local[4]` 慢约 40%,峰值 RSS 从 12.42 GB 升到 18.00 GB。
+- 解释:该路径更受 shuffle/序列化/I/O、Python worker 调度和每组 pandas reducer 尾部任务影响,不是单纯 CPU core 数不足。报告中可据此说明"Spark 并行度不是越高越好;local mode 需要实测拐点"。
+
+### 当前进度同步
+
+- P1 主线(多系统算法对比)已完成:Table 1 + Table 2 + v2 actigraphy 子集补充表均已固化。
+- W3 已完成 A6;下一步优先推进 A5 覆盖率/子集分析说明,再做 A1-A4 或可视化(雷达图、混淆矩阵、lineage)。
+
+---
+
 ## 2026-06-02 - W2 收口:feat_v2 actigraphy 双路径跑通
 
 ### 目标
