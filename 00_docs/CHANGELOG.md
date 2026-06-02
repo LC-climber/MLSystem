@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-03 — W3 A5 actigraphy 覆盖率分析落地
+
+推进 P1 W3 的 A5 覆盖率/子集分析,把 `feat_v2/all` 主表未稳定提升的原因写成可复现证据链。
+
+- 新增 `src/experiments/run_p1_ablation_a5_coverage.py`:读取 Table 2 主表、`feat_v2/actigraphy` 子集表、feat_v2 parquet 和 fold assignment,生成覆盖率与指标 delta 汇总。
+- 新增 `reports/p1_ablation_a5_coverage.csv`:三系统 x 两算法的 `v2/all - v1/all` 主协议 delta,并附带 actigraphy 子集补充指标。
+- 新增 `reports/p1_ablation_a5_fold_coverage.csv`:记录 5-fold actigraphy 覆盖分布;标注样本覆盖率 36.4%,fold 4 的 actigraphy 子集 class 3 数为 0。
+- 更新 `PROGRESS.md`:新增 A5 结果摘要,当前待办收敛为 A1-A4 与可视化。
+- 更新 `PROJECT_LOG.md`:追加 2026-06-03 A5 流水,明确 actigraphy 子集只能作补充证据,不能替代 Table 2 主表。
+
+---
+
 ## 2026-06-03 — W3 A6 Spark 并行度扫描落地
 
 推进 P1 W3 的第一项消融 A6,把 Spark actigraphy 特征阶段从单点 `local[8]` 扩展为并行度扫描。

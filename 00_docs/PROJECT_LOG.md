@@ -11,6 +11,66 @@
 
 ---
 
+## 2026-06-03 - W3 A5:actigraphy 覆盖率/子集分析
+
+### 目标
+
+解释 `feat_v2_biosensing` 在 Table 2 主表中没有稳定提升的原因:是真实 actigraphy 信号无效,还是覆盖率不足和子集类别稀疏导致收益被稀释。
+
+### 新增脚本
+
+新增 `src/experiments/run_p1_ablation_a5_coverage.py`:
+- 读取已完成的 `reports/p1_systemwise_table2.csv` 与 `reports/p1_systemwise_feat_v2_actigraphy.csv`。
+- 从 `feat_v2__cpu__seed42.parquet` 和原 5-fold assignment 计算 actigraphy 覆盖率、fold 覆盖分布和 class 分布。
+- 输出同协议主表 delta(`v2/all - v1/all`)与 actigraphy 子集补充结果。
+
+执行命令:
+
+```bash
+python -m src.experiments.run_p1_ablation_a5_coverage
+```
+
+### 产物
+
+- `reports/p1_ablation_a5_coverage.csv` — 三系统 x 两算法的 A5 汇总表。
+- `reports/p1_ablation_a5_fold_coverage.csv` — 5-fold 覆盖率与 class 分布表。
+
+### 覆盖率事实
+
+| 口径 | 覆盖数 | 覆盖率 |
+|---|---:|---:|
+| 全体 feature 行 | 996 / 3960 | 25.2% |
+| 有标签 CV 样本 | 996 / 2736 | 36.4% |
+
+5-fold actigraphy 子集分布:
+
+| fold | all n | actigraphy n | coverage | actigraphy class 3 |
+|---:|---:|---:|---:|---:|
+| 0 | 547 | 200 | 36.6% | 3 |
+| 1 | 548 | 215 | 39.2% | 4 |
+| 2 | 547 | 200 | 36.6% | 1 |
+| 3 | 547 | 192 | 35.1% | 2 |
+| 4 | 547 | 189 | 34.6% | 0 |
+
+### 指标解释
+
+同协议主表(`v2/all - v1/all`)下:
+- LR 三系统 Macro-F1 均略降:`sklearn -0.003`,`spark -0.019`,`pytorch -0.002`。
+- MLP 结果混合:`sklearn +0.005`,`spark +0.033`,`pytorch -0.002`;只有 Spark MLP 明显上升,不足以支持"feat_v2 稳定提升"。
+- QWK 多数下降,只有 PyTorch LR 轻微上升(`+0.002`)和 Spark MLP 上升(`+0.017`)。
+
+子集结果解释:
+- `v2/actigraphy` 只保留 996 个有真实 actigraphy 的标注样本,不是 Table 2 主协议。
+- fold 4 的 actigraphy 子集没有 class 3 验证样本,因此该表只能作为覆盖率敏感性/补充证据。
+- 论文/汇报口径:actigraphy 特征工程与 Spark 等价性已成立,但当前数据覆盖率与类别稀疏限制了它对主表指标的稳定贡献。
+
+### 当前进度同步
+
+- W3 已完成 A5 与 A6 两个关键消融。
+- 下一步建议转向可视化:Table 2 跨系统图、A6 并行度曲线、A5 覆盖率图、代表性混淆矩阵和 pandas/Spark lineage 图。
+
+---
+
 ## 2026-06-03 - W3 A6:Spark 并行度扫描
 
 ### 目标
