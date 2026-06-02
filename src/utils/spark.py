@@ -75,10 +75,26 @@ def pin_worker_python() -> str:
     return sys.executable
 
 
-# Pin at import so JAVA_HOME / PYSPARK_PYTHON are correct no matter how Spark is
-# first touched.
+def pin_driver_memory() -> None:
+    """Make spark.driver.memory actually take effect in local mode.
+
+    In local/client mode the driver JVM is launched by the py4j gateway the first
+    time a SparkSession is built — BEFORE builder.config("spark.driver.memory") can
+    apply — so that config is silently ignored and the JVM runs at the ~1g default.
+    Exact `percentile` aggregates (TypedImperativeAggregate) buffer every value per
+    group and OOM that default heap. PYSPARK_SUBMIT_ARGS is read before the gateway
+    starts, so inject the heap size there (no-op if the caller already set it).
+    """
+    mem = SPARK_CONFIG.get("spark.driver.memory")
+    if mem and "PYSPARK_SUBMIT_ARGS" not in os.environ:
+        os.environ["PYSPARK_SUBMIT_ARGS"] = f"--driver-memory {mem} pyspark-shell"
+
+
+# Pin at import so JAVA_HOME / PYSPARK_PYTHON / driver-memory are correct no matter
+# how Spark is first touched.
 pin_java_home()
 pin_worker_python()
+pin_driver_memory()
 
 
 def get_spark_session(
@@ -93,6 +109,7 @@ def get_spark_session(
 
     java_home = pin_java_home()
     pin_worker_python()
+    pin_driver_memory()
     os.makedirs(SPARK_CONFIG["spark.local.dir"], exist_ok=True)
 
     from pyspark.sql import SparkSession

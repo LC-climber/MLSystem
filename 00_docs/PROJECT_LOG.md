@@ -11,6 +11,77 @@
 
 ---
 
+## 2026-06-02 - W2 收口:feat_v2 actigraphy 双路径跑通
+
+### 目标
+
+补齐 P1 的核心试验场:`feat_v2_biosensing`。该阶段用于回答"Spark 应该放在训练阶段,还是放在大规模特征/ETL 阶段"。
+
+### OOM 判定与 pandas 路径改造
+
+**结论**:原始 pandas 全量加载会 OOM,已改为逐 `id=*` 分区流式聚合。
+
+证据:
+- 全量 actigraphy 约 996 个分区,真实行数约 3.15 亿。
+- 当前机器 RAM 约 31 GiB。
+- 全量 `pd.read_parquet(series_root)` 展开后约 36 GB,其中 `id` object 字符串列约 20 GB,还不含 groupby/quantile 中间态。
+- 改造后 pandas 每次只读取一个参与者分区和 9 个必要列,峰值 RSS 约 0.63 GB。
+
+产物:
+- 代码:`src/data/preprocess_actigraphy_pandas.py`
+- 输出:`data/processed/feat_v2__cpu__seed42.parquet`
+- shape:`3960 x 147`
+- actigraphy 覆盖:`996/3960` 行
+- 聚合耗时:约 39.45s
+
+### Spark 路径尝试与最终方案
+
+第一版尝试使用 Spark 原生 exact `percentile` 聚合,但失败:
+- `percentile` 是 TypedImperativeAggregate,会为每组缓存/装箱大量 double。
+- 在约 3.15 亿行 x 18 个分位数聚合下,即使 driver heap 提升到 12g,仍出现 GC overhead/OOM。
+- `percentile_approx` 可以缓解内存,但不能满足方案要求的 `<1e-6` 精确等价性。
+
+最终方案:
+- 使用 `groupBy(id).applyInPandas(...)`。
+- Spark 负责按参与者分片调度,每组调用同一份 pandas reducer。
+- 这样保留精确分位数、NaN 处理、`std(ddof=1)` 等行为,同时把内存限制在单个参与者分区量级。
+
+产物:
+- 代码:`src/data/preprocess_actigraphy_spark.py`
+- 输出:`data/processed/feat_v2__spark__seed42.parquet`
+- shape:`3960 x 147`
+- Spark master:`local[8]`
+- 聚合耗时:约 120.91s
+
+相关配置:
+- `src/config.py`:Spark driver/executor memory 从 8g 调到 12g。
+- `src/utils/spark.py`:新增 `pin_driver_memory()`,通过 `PYSPARK_SUBMIT_ARGS` 让 local/client 模式的 driver heap 在 JVM 启动前生效。
+
+### 等价性校验
+
+CPU/Spark 产物已通过列级等价性校验:
+
+| 项 | 结果 |
+|---|---|
+| shape | CPU/Spark 均为 `3960 x 147` |
+| actigraphy 列数 | 47 |
+| actigraphy 覆盖 | CPU/Spark 均为 996 行 |
+| id 集合 | 一致 |
+| NaN 位置 | 一致 |
+| 非 NaN 单元最大绝对差 | `1.14e-13` |
+| 方案阈值 | `<1e-6` |
+
+说明:raw parquet 文件 MD5 不应作为数值等价性依据,因为不同 backend/writer 的编码可能不同。Table 1 应使用排序后的逻辑 hash + NaN 感知 diff。
+
+### 当前未完成项
+
+- Table 1 还未固化为 `reports/` CSV 和 MLflow 记录;需要脚本化 pandas/Spark 计时、RSS、逻辑 hash、等价性。
+- Table 2 的 feat_v2 模型 6 行还未跑;`run_p1_systemwise.py` 仍硬编码 feat_v1。
+- feat_v2 模型对比策略已定:主表使用全 3960 行 + 原 5-fold + 训练折内填补;996 actigraphy 子集作为 A5/补充分析单独做。
+- `00_docs/PROGRESS.md` 已更新为当前快照。
+
+---
+
 ## 2026-05-29 - W0/W1 阶段开发
 
 ### 硬件环境
@@ -97,19 +168,19 @@ pip freeze > envs/pinned_openpi_311_mlsys.txt
 **解决方案**:
 1. 访问 https://www.kaggle.com/settings
 2. 点击 "Create New Token"
-3. 复制显示的 Token: `KGAT_4b34606e927c8ebbc6d8635b9dd4d626`
+3. 复制显示的 Token: `<redacted>`
 4. 设置环境变量:
 
 ```bash
 # 添加到 ~/.bashrc
-echo 'export KAGGLE_API_TOKEN="KGAT_4b34606e927c8ebbc6d8635b9dd4d626"' >> ~/.bashrc
+echo 'export KAGGLE_API_TOKEN="<redacted>"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 **验证**:
 ```bash
 conda activate openpi_311
-export KAGGLE_API_TOKEN="KGAT_4b34606e927c8ebbc6d8635b9dd4d626"
+export KAGGLE_API_TOKEN="<redacted>"
 kaggle competitions list | head -5
 # ✅ 成功显示竞赛列表
 ```
@@ -132,7 +203,7 @@ rm data/raw/child-mind-institute-problematic-internet-use.zip
 # 方案 2: 使用后台下载
 source /home/er/Devenv/Anaconda3/etc/profile.d/conda.sh
 conda activate openpi_311
-export KAGGLE_API_TOKEN="KGAT_4b34606e927c8ebbc6d8635b9dd4d626"
+export KAGGLE_API_TOKEN="<redacted>"
 cd data/raw
 kaggle competitions download -c child-mind-institute-problematic-internet-use
 

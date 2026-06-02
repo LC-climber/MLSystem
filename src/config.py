@@ -118,8 +118,11 @@ MLP_TORCH_CONFIG = {
 # Spark Configuration
 # ============================================================================
 SPARK_CONFIG = {
-    "spark.driver.memory": "8g",
-    "spark.executor.memory": "8g",
+    # Exact `percentile` aggregates buffer every value per group → heap-hungry.
+    # NOTE: in local mode this only takes effect via PYSPARK_SUBMIT_ARGS (see
+    # src/utils/spark.py::pin_driver_memory); builder.config() is too late.
+    "spark.driver.memory": "12g",
+    "spark.executor.memory": "12g",
     "spark.sql.shuffle.partitions": "20",
     "spark.local.dir": str(PROJECT_ROOT / "spark_tmp")
 }

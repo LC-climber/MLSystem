@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-06-02 — P1 feat_v2 当前快照与流水更新
+
+围绕 P1 的 `feat_v2_biosensing` 收口,把文档状态从"actigraphy 未跑通"更新为"双路径已跑通、等价性已通过、Table 1/2 待固化"。
+
+- 新增/重写 `PROGRESS.md`:作为当前状态快照,记录 feat_v2 pandas/Spark 产物、关键耗时、等价性结论与下一步。
+- 更新 `PROJECT_LOG.md`:追加 2026-06-02 feat_v2 流水,包括 pandas OOM 判定、Spark exact percentile 失败、`applyInPandas` 最终方案、产物结构和后续待办。
+- 当前文件中的 Kaggle token 明文已替换为 `<redacted>`;历史 git 记录若曾包含该 token,应在 Kaggle 侧作废并重新生成。
+
+---
+
 ## 2026-05-31 — 环境方案落地校正(README / runbook / charter 对齐实现)
 
 修正实现与文档的矛盾:`README.md`、`v2/05_runbook_v2.md`、`v2/02_charter_v2.md` 仍写"三套 conda 环境(`mlsys_cpu/gpu_local/gpu_remote`)+ `setup_envs.sh`",而 2026-05-29 实际落地已改为**复用单一 `openpi_311` 环境**(PyTorch 2.9.0+cu128,原生支持 sm_120)。矛盾根因:`README.md`(05-29 12:24)写于环境决策(~12:30)之前,此后未回改。
