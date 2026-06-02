@@ -12,6 +12,7 @@
 - 更新 `PROJECT_LOG.md`:追加 2026-06-02 feat_v2 流水,包括 pandas OOM 判定、Spark exact percentile 失败、`applyInPandas` 最终方案、产物结构和后续待办。
 - 新增 `src/experiments/run_p1_feature_stage.py` 并生成 `reports/p1_feature_stage_feat_v2.csv`;文档同步记录 Table 1 的 wall time、进程树 RSS、逻辑 hash 与等价性。
 - `scripts/start_mlflow.sh` 对齐实际环境 `openpi_311`;Table 1 MLflow 记录在 server 不可用时 fallback 到本地 SQLite。
+- 扩展 `run_p1_systemwise.py` 支持 `--feature v1|v2` 与 `--cohort all|actigraphy`;生成 Table 2 主表 `reports/p1_systemwise_table2.csv` 以及 v2 actigraphy 子集补充表。
 - 当前文件中的 Kaggle token 明文已替换为 `<redacted>`;历史 git 记录若曾包含该 token,应在 Kaggle 侧作废并重新生成。
 
 ---

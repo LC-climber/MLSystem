@@ -96,6 +96,26 @@ CPU/Spark 产物已通过列级等价性校验:
 - `scripts/start_mlflow.sh` 从旧的 `mlsys_cpu` 环境改为实际使用的 `openpi_311`。
 - 在 sandbox 内 HTTP MLflow server 未运行,脚本 fallback 到 `sqlite:///mlruns.db` 并成功写入 `feature_stage_pandas` / `feature_stage_spark`。
 
+### Table 2 主表补齐(同日追加)
+
+扩展 `src/experiments/run_p1_systemwise.py`:
+- 新增 `--feature v1|v2`。
+- 新增 `--cohort all|actigraphy`。
+- 新增 `load_feat_v2()` 读取 canonical `feat_v2__cpu__seed42.parquet`。
+- 输出统一 schema 的报告 CSV,并记录 `feat_version` / `cohort` / `n_samples` / `n_features` 到 MLflow。
+
+产物:
+- `reports/p1_systemwise_feat_v1.csv` — v1/all 6 行(用新 schema 重跑)。
+- `reports/p1_systemwise_feat_v2.csv` — v2/all 6 行。
+- `reports/p1_systemwise_table2.csv` — Table 2 主表 12 行(v1+v2)。
+- `reports/p1_systemwise_feat_v2_actigraphy.csv` — v2/actigraphy 子集 6 行,供 A5/覆盖率分析。
+- `mlruns.db` — 已写入 `feat_v1_all_*`、`feat_v2_all_*`、`feat_v2_actigraphy_*` systemwise runs。
+
+Table 2 主表要点:
+- v2 全体样本没有带来明显指标提升:sklearn LR Macro-F1 `0.362 -> 0.359`,QWK `0.365 -> 0.343`;PyTorch MLP Macro-F1 约持平(`0.343 -> 0.341`)。
+- Spark 训练阶段仍慢:Spark LR v2 约 `25.3s/fold`,单行推理约 `156 ms`,继续支撑"训练阶段 Spark 不适合本任务"。
+- v2 actigraphy 子集共 996 个标注样本;第 4 折验证集没有 class 3,出现 sklearn metric warning,因此子集结果只作补充/A5,不替代主表。
+
 ---
 
 ## 2026-05-29 - W0/W1 阶段开发

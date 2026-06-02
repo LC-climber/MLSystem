@@ -22,6 +22,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from src.config import SEED, DATA_PROCESSED_DIR, IMPUTATION_STRATEGY, SCALER_TYPE
+from src.data.actigraphy_features import FEAT_V2_CPU_FILE
 from src.data.constants import ID_COL, TARGET_COL
 from src.data.loader import load_train_data, get_feature_columns
 from src.utils.logging import get_logger
@@ -110,6 +111,16 @@ def load_feat_v1(path: Path = FEAT_V1_FILE) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(
             f"feat_v1 not found: {path}. Generate it: python -m src.data.feature_engineering"
+        )
+    return read_parquet(path)
+
+
+def load_feat_v2(path: Path = FEAT_V2_CPU_FILE) -> pd.DataFrame:
+    """Load canonical feat_v2 (CPU reference; Spark copy is equivalence-checked)."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"feat_v2 not found: {path}. Generate it: "
+            "python -m src.data.preprocess_actigraphy_pandas"
         )
     return read_parquet(path)
 
