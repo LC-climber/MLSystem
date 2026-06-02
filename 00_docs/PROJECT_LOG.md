@@ -11,6 +11,65 @@
 
 ---
 
+## 2026-06-03 - P1 中期汇报材料
+
+### 目标
+
+明天需要汇报,因此将 P1 已完成实验整理为可直接使用的报告、PPT 和动画讲解页。
+
+### 新增材料
+
+| 类型 | 路径 | 说明 |
+|---|---|---|
+| 报告 Markdown | `00_docs/P1_MIDTERM_REPORT.md` | 按汇报叙事组织:问题、协议、Table 1、Table 2、A5、A6、结论与风险 |
+| PPTX | `reports/p1_midterm_slides.pptx` | 11 页,封面 + 10 页正文,可直接用于明天汇报 |
+| 动画 HTML | `reports/p1_midterm_explainer.html` | 独立 HTML,带步骤切换/自动播放/数据包动画,解释 Spark 在特征/ETL 阶段的机制 |
+| PPT 构建脚本 | `scripts/build_p1_midterm_ppt.py` | 从 `reports/figures/` 重新生成 PPTX |
+
+### PPT 结构
+
+1. P1 中期汇报封面
+2. 研究问题与公平协议
+3. 数据事实:Spark 有机会但 v2 覆盖受限
+4. Table 1:特征阶段 pandas vs Spark
+5. Table 2:模型质量没有因 feat_v2 稳定提升
+6. 系统成本:Spark 不适合小表格训练和单样本推理
+7. A5:覆盖率解释 feat_v2 为什么没有稳定收益
+8. A6:Spark 并行度不是越高越快
+9. 代表性混淆矩阵:类别 3 是指标不稳定来源
+10. 汇报主线:Spark 价值在哪里
+11. 结论与下一步
+
+### HTML 动画页
+
+`reports/p1_midterm_explainer.html` 是无外部依赖的单文件页面:
+- 顶部是可自动播放的 6 步 pipeline 动画。
+- 中段复用 6 张核心 SVG 图。
+- 重点解释从 tabular / actigraphy 到 pandas reference / Spark candidate / feat_v2 / Table 2 结论的因果链。
+
+### 环境变更
+
+为生成 PPTX 安装并记录:
+- `python-pptx==1.0.2`
+- `lxml==6.1.1`
+- `xlsxwriter==3.2.9`
+
+已补入 `envs/pinned_openpi_311_mlsys.txt`。
+
+### 验证
+
+- `python scripts/build_p1_midterm_ppt.py` 成功生成 PPTX。
+- 使用 `python-pptx` 回读 `reports/p1_midterm_slides.pptx`,确认 11 页。
+- HTML 引用的 6 张 SVG 图均存在。
+- `python -m compileall -q src scripts` 通过。
+
+### 当前进度同步
+
+- P1 中期汇报材料已可直接使用。
+- 下一步可选:若明天前还要增强,优先补一页"讲稿提示/答辩 Q&A";否则建议暂停 P1 新实验,转为演练汇报。
+
+---
+
 ## 2026-06-03 - W3 核心可视化
 
 ### 目标

@@ -4,7 +4,7 @@
 > 时间线流水日志见 [`PROJECT_LOG.md`](./PROJECT_LOG.md);方案与实验设计见 [`v2/03_plan_p1_v2.md`](./v2/03_plan_p1_v2.md)。
 >
 > **更新时间**:2026-06-03 · **当前阶段**:W3 消融与可视化
-> **一句话**:P1 多系统算法对比主表已完成;W3 已完成 A5/A6 和核心可视化,下一步推进 A1-A4 或整理中期材料。
+> **一句话**:P1 多系统算法对比主表、A5/A6、核心可视化和明天汇报材料均已完成;下一步可补 A1-A4 或切入 P2。
 
 ---
 
@@ -28,6 +28,7 @@
 | W3 A5 actigraphy 覆盖率分析 | 已完成 | `reports/p1_ablation_a5_coverage.csv`;`reports/p1_ablation_a5_fold_coverage.csv` |
 | W3 A6 Spark 并行度扫描 | 已完成 | `reports/p1_spark_parallelism_feat_v2.csv`;`local[4]/[8]/[20]` 均等价,但并行度越高越慢且更耗内存 |
 | W3 核心可视化 | 已完成 | `reports/figures/`;Table 2 指标、系统开销、A5 覆盖率、A6 并行度、代表性混淆矩阵、lineage |
+| P1 中期汇报材料 | 已完成 | `00_docs/P1_MIDTERM_REPORT.md`;`reports/p1_midterm_slides.pptx`;`reports/p1_midterm_explainer.html` |
 | W3 其余消融 | 待开始 | A1-A4;`feat_v3_fusion` 可选 |
 
 ---
@@ -157,6 +158,23 @@ actigraphy 子集 5-fold 风险:
 - PNG 像素非空检查通过。
 - 抽查 `p1_table2_metric_bars`、`p1_a5_coverage`、`p1_a6_spark_parallelism`、`p1_confusion_sklearn_lr`、`p1_feature_lineage` 无明显遮挡或裁切。
 
+### 2.8 P1 中期汇报材料
+
+明天汇报可用材料已完成:
+
+| 类型 | 路径 | 说明 |
+|---|---|---|
+| 报告 Markdown | `00_docs/P1_MIDTERM_REPORT.md` | 完整叙事、实验协议、关键表、A5/A6、讲稿建议 |
+| PPTX | `reports/p1_midterm_slides.pptx` | 11 页,封面 + 10 页正文,复用 W3 图件 |
+| 动画 HTML | `reports/p1_midterm_explainer.html` | 单文件 HTML,含步骤动画、自动播放、图件讲解 |
+| PPT 构建脚本 | `scripts/build_p1_midterm_ppt.py` | 可从 figures 重新生成 PPTX |
+
+验证:
+- PPTX 回读成功,共 11 页,文件大小约 474KB。
+- HTML 引用的 6 张 SVG 图均存在。
+- `python -m compileall -q src scripts` 通过。
+- 为生成 PPT 新增 `python-pptx==1.0.2`,并已补入 `envs/pinned_openpi_311_mlsys.txt`。
+
 ---
 
 ## 3. 当前待办
@@ -164,7 +182,7 @@ actigraphy 子集 5-fold 风险:
 1. **W3 消融与可视化**
    - A1-A4 消融;A5 覆盖率分析、A6 并行度扫描与核心可视化已完成。
    - `feat_v3_fusion` 可选,不阻塞 P1 主结论。
-   - 下一步建议整理中期材料/报告骨架,或选择性补 A1-A4 轻量消融。
+   - 中期材料已完成;下一步建议根据时间选择:补 A1-A4 轻量消融,或开始 P2 MLOps。
 
 ---
 
@@ -184,6 +202,7 @@ python -m src.experiments.run_p1_feature_stage --mlflow
 python -m src.experiments.run_p1_ablation_a5_coverage
 python -m src.experiments.run_p1_spark_parallelism --mlflow
 python -m src.experiments.run_p1_visualizations
+python scripts/build_p1_midterm_ppt.py
 python -m src.experiments.run_p1_systemwise --feature v2 --mlflow
 python -m src.experiments.run_p1_systemwise --feature v2 --cohort actigraphy --mlflow
 ```

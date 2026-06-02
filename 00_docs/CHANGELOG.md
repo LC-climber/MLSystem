@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-06-03 — P1 中期汇报材料落地
+
+面向 2026-06-04 汇报,将 P1 实验结果整理为文档、PPT 和动画 HTML。
+
+- 新增 `00_docs/P1_MIDTERM_REPORT.md`:中期汇报报告骨架,覆盖问题定义、实验协议、Table 1、Table 2、A5、A6、讲稿建议和风险边界。
+- 新增 `scripts/build_p1_midterm_ppt.py`:使用 `python-pptx` 从 `reports/figures/` 生成 PPTX。
+- 新增 `reports/p1_midterm_slides.pptx`:11 页中期汇报 PPT。
+- 新增 `reports/p1_midterm_explainer.html`:独立动画 HTML,用 6 步 pipeline 动画解释 Spark 在特征/ETL 阶段的作用与限制。
+- 更新 `envs/pinned_openpi_311_mlsys.txt`:补入 `python-pptx==1.0.2`、`lxml==6.1.1`、`xlsxwriter==3.2.9`。
+- 更新 `PROGRESS.md` 与 `PROJECT_LOG.md`:同步中期材料完成状态、验证记录和下一步建议。
+
+---
+
 ## 2026-06-03 — W3 P1 核心可视化落地
 
 把 P1 已完成结果转为中期汇报/论文可用图件。

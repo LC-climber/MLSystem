@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>P1 中期汇报动画讲解 - PIU 多系统算法对比</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d9e1ea;
+      --bg: #f7f9fb;
+      --panel: #ffffff;
+      --blue: #4c78a8;
+      --red: #e45756;
+      --green: #54a24b;
+      --orange: #f58518;
+      --teal: #72b7b2;
+      --shadow: 0 12px 32px rgba(20, 35, 50, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 249, 251, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 760;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.7fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .flow {
+      padding: 18px;
+      min-height: 560px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .flow-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      border-radius: 999px;
+      padding: 0 10px;
+      font-size: 13px;
+      font-weight: 650;
+      background: #edf3fb;
+      color: var(--blue);
+    }
+
+    .pipeline {
+      position: relative;
+      height: 390px;
+      margin-top: 10px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(76,120,168,.06), rgba(84,162,75,.05)),
+        radial-gradient(circle at 20% 20%, rgba(114,183,178,.12), transparent 28%),
+        #fbfdff;
+      border: 1px solid #e6edf4;
+    }
+
+    .node {
+      position: absolute;
+      width: 150px;
+      min-height: 76px;
+      padding: 12px 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 18px rgba(29, 53, 77, .08);
+      transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+    }
+
+    .node strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .node span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .node.active {
+      transform: translateY(-5px);
+      border-color: currentColor;
+      box-shadow: 0 13px 28px rgba(29, 53, 77, .16);
+    }
+
+    .n-data { left: 34px; top: 80px; color: var(--blue); }
+    .n-act { left: 34px; top: 220px; color: var(--teal); }
+    .n-pandas { left: 250px; top: 78px; color: var(--blue); }
+    .n-spark { left: 250px; top: 220px; color: var(--red); }
+    .n-feature { left: 480px; top: 148px; color: var(--orange); }
+    .n-model { right: 176px; top: 148px; color: var(--green); }
+    .n-report { right: 26px; top: 148px; color: #7b61a8; }
+
+    .wire {
+      position: absolute;
+      height: 3px;
+      background: var(--line);
+      border-radius: 99px;
+      transform-origin: left center;
+    }
+
+    .w1 { left: 184px; top: 118px; width: 65px; background: rgba(76,120,168,.45); }
+    .w2 { left: 184px; top: 258px; width: 65px; background: rgba(228,87,86,.45); }
+    .w3 { left: 400px; top: 118px; width: 88px; transform: rotate(23deg); background: rgba(76,120,168,.38); }
+    .w4 { left: 400px; top: 258px; width: 88px; transform: rotate(-23deg); background: rgba(228,87,86,.38); }
+    .w5 { left: 630px; top: 188px; width: 98px; background: rgba(84,162,75,.45); }
+    .w6 { right: 176px; top: 188px; width: 38px; background: rgba(123,97,168,.42); }
+
+    .packet {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--orange);
+      opacity: 0;
+      box-shadow: 0 0 0 7px rgba(245,133,24,.14);
+    }
+
+    .pipeline.play .p-pandas {
+      animation: pandasPath 3.2s ease-in-out infinite;
+    }
+
+    .pipeline.play .p-spark {
+      animation: sparkPath 3.2s ease-in-out infinite .7s;
+      background: var(--red);
+      box-shadow: 0 0 0 7px rgba(228,87,86,.13);
+    }
+
+    @keyframes pandasPath {
+      0% { opacity: 0; left: 66px; top: 111px; }
+      12% { opacity: 1; }
+      32% { left: 315px; top: 111px; }
+      56% { left: 542px; top: 181px; }
+      76% { left: 755px; top: 181px; }
+      92% { opacity: 1; }
+      100% { opacity: 0; left: 930px; top: 181px; }
+    }
+
+    @keyframes sparkPath {
+      0% { opacity: 0; left: 66px; top: 251px; }
+      12% { opacity: 1; }
+      32% { left: 315px; top: 251px; }
+      56% { left: 542px; top: 181px; }
+      76% { left: 755px; top: 181px; }
+      92% { opacity: 1; }
+      100% { opacity: 0; left: 930px; top: 181px; }
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .metric b {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .metric small { color: var(--muted); }
+
+    .side {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .step-body {
+      color: #314153;
+      margin: 0;
+    }
+
+    .takeaway {
+      border-left: 4px solid var(--orange);
+      padding: 10px 12px;
+      background: #fff8ef;
+      border-radius: 6px;
+      color: #3c2b17;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+      min-height: 38px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .step-dot {
+      min-height: 54px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .step-dot.active {
+      border-color: var(--blue);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(76,120,168,.14);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .figure {
+      padding: 14px;
+    }
+
+    .figure h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+
+    .figure img {
+      width: 100%;
+      display: block;
+      border: 1px solid #edf1f5;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .figure p {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 10px 0 0;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 18px 0 4px;
+    }
+
+    @media (max-width: 900px) {
+      .topbar, .stage, .grid { display: block; }
+      .subtitle { white-space: normal; margin-top: 4px; }
+      .side, .grid .panel { margin-top: 14px; }
+      .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pipeline { height: 620px; }
+      .node { left: 22px !important; right: auto !important; width: calc(100% - 44px); }
+      .n-data { top: 28px; }
+      .n-act { top: 118px; }
+      .n-pandas { top: 218px; }
+      .n-spark { top: 308px; }
+      .n-feature { top: 408px; }
+      .n-model { top: 498px; }
+      .n-report { top: 588px; }
+      .wire, .packet { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>P1 中期汇报动画讲解</h1>
+        <div class="subtitle">PIU 多系统算法对比:Spark 应该放在训练阶段,还是特征/ETL 阶段?</div>
+      </div>
+      <span class="badge">W3 ready</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="stage">
+      <div class="panel flow">
+        <div class="flow-title">
+          <h2>从 3.15 亿行 actigraphy 到模型结论</h2>
+          <span class="badge" id="stepBadge">Step 1 / 6</span>
+        </div>
+
+        <div class="pipeline play" id="pipeline">
+          <div class="wire w1"></div>
+          <div class="wire w2"></div>
+          <div class="wire w3"></div>
+          <div class="wire w4"></div>
+          <div class="wire w5"></div>
+          <div class="wire w6"></div>
+          <div class="packet p-pandas"></div>
+          <div class="packet p-spark"></div>
+
+          <div class="node n-data active" data-node="0">
+            <strong>Tabular PIU</strong>
+            <span>3960 rows, 2736 labeled, leakage removed</span>
+          </div>
+          <div class="node n-act" data-node="1">
+            <strong>Actigraphy</strong>
+            <span>996 participants, about 315M time-series rows</span>
+          </div>
+          <div class="node n-pandas" data-node="2">
+            <strong>pandas streaming</strong>
+            <span>read one id partition at a time, 38s / 0.65GB</span>
+          </div>
+          <div class="node n-spark" data-node="3">
+            <strong>Spark ETL</strong>
+            <span>groupBy(id) + applyInPandas, exact and equivalent</span>
+          </div>
+          <div class="node n-feature" data-node="4">
+            <strong>feat_v2</strong>
+            <span>feat_v1 + 47 actigraphy features, 996 covered rows</span>
+          </div>
+          <div class="node n-model" data-node="5">
+            <strong>3 systems</strong>
+            <span>sklearn / Spark / PyTorch, LR + MLP, same folds</span>
+          </div>
+          <div class="node n-report" data-node="5">
+            <strong>Conclusion</strong>
+            <span>Spark training is costly; ETL needs algorithm-aware design</span>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <b>38s vs 114s</b>
+            <small>pandas streaming vs Spark applyInPandas on feat_v2 feature stage</small>
+          </div>
+          <div class="metric">
+            <b>36.4%</b>
+            <small>labeled samples with actigraphy coverage</small>
+          </div>
+          <div class="metric">
+            <b>local[4]</b>
+            <small>fastest Spark local setting in A6; more cores were slower</small>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel side">
+        <h2 class="step-title" id="stepTitle"></h2>
+        <p class="step-body" id="stepBody"></p>
+        <div class="takeaway" id="stepTakeaway"></div>
+        <div class="controls">
+          <button id="prevBtn">上一页</button>
+          <button class="primary" id="autoBtn">暂停动画</button>
+          <button id="nextBtn">下一页</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="steps" id="steps"></section>
+
+    <section class="grid">
+      <article class="panel figure">
+        <h3>Table 2:模型质量对比</h3>
+        <img src="figures/p1_table2_metric_bars.svg" alt="Table 2 model quality bars">
+        <p>v2 没有稳定压过 v1;Spark LR 与 sklearn LR 指标接近,但系统成本不同。</p>
+      </article>
+
+      <article class="panel figure">
+        <h3>系统成本:训练与推理</h3>
+        <img src="figures/p1_system_costs.svg" alt="System training and inference costs">
+        <p>Spark 单行推理是完整 job 调度,因此在小表格在线推理阶段非常不划算。</p>
+      </article>
+
+      <article class="panel figure">
+        <h3>A5:覆盖率与类别稀疏</h3>
+        <img src="figures/p1_a5_coverage.svg" alt="Actigraphy coverage and class sparsity">
+        <p>有标签样本 actigraphy 覆盖率只有 36.4%;fold 4 的 actigraphy 子集没有 class 3。</p>
+      </article>
+
+      <article class="panel figure">
+        <h3>A6:Spark 并行度不是越高越快</h3>
+        <img src="figures/p1_a6_spark_parallelism.svg" alt="Spark local parallelism scan">
+        <p>`local[4]` 最快;`local[20]` 更慢且 RSS 更高,说明瓶颈不只是 CPU core 数。</p>
+      </article>
+
+      <article class="panel figure">
+        <h3>代表性混淆矩阵</h3>
+        <img src="figures/p1_confusion_sklearn_lr.svg" alt="Representative confusion matrices">
+        <p>类别 3 样本极少,容易被预测为 class 2;这限制了宏平均指标的稳定提升。</p>
+      </article>
+
+      <article class="panel figure">
+        <h3>feat_v2 特征 lineage</h3>
+        <img src="figures/p1_feature_lineage.svg" alt="Feature lineage">
+        <p>pandas reference 与 Spark candidate 复用同一 reducer,用 diff/hash 闭环保证等价。</p>
+      </article>
+    </section>
+
+    <p class="footer-note">
+      相关材料: <code>00_docs/P1_MIDTERM_REPORT.md</code>,
+      <code>reports/p1_midterm_slides.pptx</code>,
+      <code>reports/figures/</code>.
+    </p>
+  </main>
+
+  <script>
+    const steps = [
+      {
+        title: "1. 先固定公平协议",
+        body: "P1 比较的不是单个模型技巧,而是 sklearn / Spark / PyTorch 三个系统在同一 PIU 四分类任务上的质量和系统成本。所有系统共享 seed=42、同一 5-fold、同一预处理规则。",
+        takeaway: "公平性核心:相同 feature、fold、imputer/scaler 策略;只改变系统实现。",
+        nodes: [0]
+      },
+      {
+        title: "2. Spark 的机会在特征阶段",
+        body: "表格数据只有几千行,训练阶段 Spark 调度开销明显。但 actigraphy 有约 3.15 亿行原始时序,这是 Spark 可能有价值的位置。",
+        takeaway: "问题从“Spark 能不能训练模型”转成“Spark 能不能高效做大规模特征/ETL”。",
+        nodes: [1]
+      },
+      {
+        title: "3. pandas reference 必须先避免 OOM",
+        body: "全量 pd.read_parquet 会展开到约 36GB 并 OOM。改为按 id=* 分区流式读取后,pandas 只需约 0.65GB RSS,38 秒完成 feat_v2 reference。",
+        takeaway: "单机 baseline 不是 naive pandas,而是按数据分区形态写出的 streaming pandas。",
+        nodes: [2]
+      },
+      {
+        title: "4. Spark 也要选对聚合算法",
+        body: "Spark 原生 exact percentile 会缓存大量 double,12GB heap 仍可能 GC/OOM。最终方案是 groupBy(id).applyInPandas,让 Spark 分片,让同一份 pandas reducer 保证精确等价。",
+        takeaway: "Spark 不是盲目并行;精确分位数这种算法细节会决定系统表现。",
+        nodes: [3, 4]
+      },
+      {
+        title: "5. 模型主表没有稳定吃到 v2 收益",
+        body: "feat_v2/all 只在 36.4% 有标签样本上有真实 actigraphy。LR 三系统 Macro-F1 都略降,MLP 只有 Spark MLP 明显提升,不足以说 v2 稳定更好。",
+        takeaway: "A5 的解释:不是特征工程错了,而是覆盖率和类别稀疏限制了主表收益。",
+        nodes: [4, 5]
+      },
+      {
+        title: "6. 最终结论",
+        body: "Spark 在训练/单样本推理阶段成本高;在大规模特征阶段也需要匹配正确算法和并行度。P1 的核心贡献是把“模型分数”和“系统成本”放在同一张证据链里。",
+        takeaway: "明天汇报主线:Spark 的价值在 ETL,但 ETL 也必须实测与算法适配。",
+        nodes: [5]
+      }
+    ];
+
+    let idx = 0;
+    let timer = null;
+
+    const title = document.getElementById("stepTitle");
+    const body = document.getElementById("stepBody");
+    const takeaway = document.getElementById("stepTakeaway");
+    const badge = document.getElementById("stepBadge");
+    const stepHost = document.getElementById("steps");
+    const autoBtn = document.getElementById("autoBtn");
+    const pipeline = document.getElementById("pipeline");
+
+    function renderDots() {
+      stepHost.innerHTML = "";
+      steps.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.className = "step-dot";
+        b.textContent = s.title.replace(/^\d+\.\s*/, "");
+        b.addEventListener("click", () => show(i));
+        stepHost.appendChild(b);
+      });
+    }
+
+    function show(next) {
+      idx = (next + steps.length) % steps.length;
+      const s = steps[idx];
+      title.textContent = s.title;
+      body.textContent = s.body;
+      takeaway.textContent = s.takeaway;
+      badge.textContent = `Step ${idx + 1} / ${steps.length}`;
+      document.querySelectorAll(".step-dot").forEach((el, i) => {
+        el.classList.toggle("active", i === idx);
+      });
+      document.querySelectorAll(".node").forEach((el) => {
+        const n = Number(el.dataset.node);
+        el.classList.toggle("active", s.nodes.includes(n));
+      });
+      pipeline.classList.remove("play");
+      void pipeline.offsetWidth;
+      pipeline.classList.add("play");
+    }
+
+    function start() {
+      if (timer) return;
+      timer = setInterval(() => show(idx + 1), 5200);
+      autoBtn.textContent = "暂停动画";
+      pipeline.classList.add("play");
+    }
+
+    function stop() {
+      clearInterval(timer);
+      timer = null;
+      autoBtn.textContent = "播放动画";
+      pipeline.classList.remove("play");
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => show(idx - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => show(idx + 1));
+    autoBtn.addEventListener("click", () => timer ? stop() : start());
+
+    renderDots();
+    show(0);
+    start();
+  </script>
+</body>
+</html>
