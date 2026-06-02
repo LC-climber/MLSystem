@@ -6,10 +6,12 @@
 
 ## 2026-06-02 — P1 feat_v2 当前快照与流水更新
 
-围绕 P1 的 `feat_v2_biosensing` 收口,把文档状态从"actigraphy 未跑通"更新为"双路径已跑通、等价性已通过、Table 1/2 待固化"。
+围绕 P1 的 `feat_v2_biosensing` 收口,把文档状态从"actigraphy 未跑通"更新为"双路径已跑通、等价性已通过、Table 1 已固化、Table 2 待补齐"。
 
 - 新增/重写 `PROGRESS.md`:作为当前状态快照,记录 feat_v2 pandas/Spark 产物、关键耗时、等价性结论与下一步。
 - 更新 `PROJECT_LOG.md`:追加 2026-06-02 feat_v2 流水,包括 pandas OOM 判定、Spark exact percentile 失败、`applyInPandas` 最终方案、产物结构和后续待办。
+- 新增 `src/experiments/run_p1_feature_stage.py` 并生成 `reports/p1_feature_stage_feat_v2.csv`;文档同步记录 Table 1 的 wall time、进程树 RSS、逻辑 hash 与等价性。
+- `scripts/start_mlflow.sh` 对齐实际环境 `openpi_311`;Table 1 MLflow 记录在 server 不可用时 fallback 到本地 SQLite。
 - 当前文件中的 Kaggle token 明文已替换为 `<redacted>`;历史 git 记录若曾包含该 token,应在 Kaggle 侧作废并重新生成。
 
 ---

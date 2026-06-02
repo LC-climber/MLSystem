@@ -75,10 +75,26 @@ CPU/Spark 产物已通过列级等价性校验:
 
 ### 当前未完成项
 
-- Table 1 还未固化为 `reports/` CSV 和 MLflow 记录;需要脚本化 pandas/Spark 计时、RSS、逻辑 hash、等价性。
+- Table 1 已固化为 `reports/p1_feature_stage_feat_v2.csv`,并通过本地 SQLite fallback 写入 MLflow runs `feature_stage_pandas/spark`。
 - Table 2 的 feat_v2 模型 6 行还未跑;`run_p1_systemwise.py` 仍硬编码 feat_v1。
 - feat_v2 模型对比策略已定:主表使用全 3960 行 + 原 5-fold + 训练折内填补;996 actigraphy 子集作为 A5/补充分析单独做。
 - `00_docs/PROGRESS.md` 已更新为当前快照。
+
+### Table 1 固化(同日追加)
+
+新增 `src/experiments/run_p1_feature_stage.py`,生成方案 §7.2 的 Table 1:
+
+| backend | tool | wall(s) | peak RSS(GB) | logical hash | consistency |
+|---|---|---:|---:|---|---|
+| pandas | pandas_streaming | 38.13 | 0.65 | `5530ecc5f44fda5247629879523c3d38` | reference |
+| spark | spark_applyInPandas, `local[8]` | 114.01 | 13.25 | `5530ecc5f44fda5247629879523c3d38` | `max_abs_diff=1.137e-13`;NaN equal |
+
+工程补充:
+- RSS 采用进程树采样,因此 Spark JVM 计入峰值内存。
+- raw parquet MD5 仍保留在 CSV 中,但一致性判断使用 rounded logical hash + NaN 感知 diff。
+- `.gitignore` 增加 `/reports/*.csv` 例外,使小型报告 CSV 可作为交付物入库。
+- `scripts/start_mlflow.sh` 从旧的 `mlsys_cpu` 环境改为实际使用的 `openpi_311`。
+- 在 sandbox 内 HTTP MLflow server 未运行,脚本 fallback 到 `sqlite:///mlruns.db` 并成功写入 `feature_stage_pandas` / `feature_stage_spark`。
 
 ---
 

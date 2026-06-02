@@ -75,6 +75,12 @@ def pin_worker_python() -> str:
     return sys.executable
 
 
+def pin_spark_local_ip() -> None:
+    """Keep local-mode Spark from probing blocked/non-deterministic interfaces."""
+    os.environ.setdefault("SPARK_LOCAL_IP", "127.0.0.1")
+    os.environ.setdefault("SPARK_LOCAL_HOSTNAME", "localhost")
+
+
 def pin_driver_memory() -> None:
     """Make spark.driver.memory actually take effect in local mode.
 
@@ -90,10 +96,11 @@ def pin_driver_memory() -> None:
         os.environ["PYSPARK_SUBMIT_ARGS"] = f"--driver-memory {mem} pyspark-shell"
 
 
-# Pin at import so JAVA_HOME / PYSPARK_PYTHON / driver-memory are correct no matter
-# how Spark is first touched.
+# Pin at import so JAVA_HOME / PYSPARK_PYTHON / local IP / driver-memory are correct
+# no matter how Spark is first touched.
 pin_java_home()
 pin_worker_python()
+pin_spark_local_ip()
 pin_driver_memory()
 
 
@@ -109,6 +116,7 @@ def get_spark_session(
 
     java_home = pin_java_home()
     pin_worker_python()
+    pin_spark_local_ip()
     pin_driver_memory()
     os.makedirs(SPARK_CONFIG["spark.local.dir"], exist_ok=True)
 

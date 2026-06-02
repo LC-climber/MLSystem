@@ -83,11 +83,11 @@ def aggregate_actigraphy_spark(series_root=SERIES_TRAIN_DIR, master="local[8]"):
     return act[[ID_COL] + actigraphy_feature_columns()]  # enforce spec order
 
 
-def build_feat_v2_spark(save: bool = True, stop: bool = True):
+def build_feat_v2_spark(save: bool = True, stop: bool = True, master: str = "local[8]"):
     """feat_v1 (all rows) LEFT JOIN Spark actigraphy block → feat_v2__spark parquet."""
     feat_v1 = load_feat_v1()
     t0 = time.perf_counter()
-    act = aggregate_actigraphy_spark()
+    act = aggregate_actigraphy_spark(master=master)
     agg_time = time.perf_counter() - t0
     logger.info(
         "spark actigraphy aggregation: %d participants, %d features, %.2fs",

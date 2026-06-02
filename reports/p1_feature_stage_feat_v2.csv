@@ -1,0 +1,3 @@
+feat_version,backend,tool,spark_master,spark_driver_memory,wall_time_s,peak_rss_gb_process_tree,consistency,rows,cols,actigraphy_rows,raw_file_md5,logical_md5_round9,id_sets_equal,nan_positions_equal,max_abs_diff_non_nan,equivalence_threshold,equivalent_to_reference,valid_cells_compared,nan_cells
+feat_v2,pandas,pandas_streaming,,,38.12712221700349,0.6513252258300781,reference,3960,147,996,1ff5ec3aca874ce9b3647517d9d475bf,5530ecc5f44fda5247629879523c3d38,True,True,0.0,1e-06,True,46810,139310
+feat_v2,spark,spark_applyInPandas,local[8],12g,114.01005933398847,13.250289916992188,max_abs_diff=1.137e-13; nan_equal=True,3960,147,996,2c791f2365627a3f9b83b1d1fdc476c4,5530ecc5f44fda5247629879523c3d38,True,True,1.1368683772161603e-13,1e-06,True,46810,139310

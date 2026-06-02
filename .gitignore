@@ -35,6 +35,7 @@ outputs/
 logs/
 *.parquet
 *.csv
+!/reports/*.csv
 *.npz
 *.h5
 *.pt

@@ -9,8 +9,10 @@ echo ""
 CONDA_BASE=$(conda info --base)
 source "$CONDA_BASE/etc/profile.d/conda.sh"
 
-# Activate mlsys_cpu environment
-conda activate mlsys_cpu
+# Activate the project's actual environment (see 00_docs/PROJECT_LOG.md).
+conda activate openpi_311
+export NO_PROXY="localhost,127.0.0.1,${NO_PROXY}"
+export no_proxy="localhost,127.0.0.1,${no_proxy}"
 
 # Get project root
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
