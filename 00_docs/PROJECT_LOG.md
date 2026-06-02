@@ -11,6 +11,54 @@
 
 ---
 
+## 2026-06-03 - W3 核心可视化
+
+### 目标
+
+把 P1 已完成的主表、A5、A6 和 feat_v2 lineage 固化为可直接用于中期汇报/论文的图。
+
+### 新增脚本
+
+新增 `src/experiments/run_p1_visualizations.py`:
+- 读取 `reports/p1_systemwise_table2.csv`、`reports/p1_ablation_a5_coverage.csv`、`reports/p1_ablation_a5_fold_coverage.csv`、`reports/p1_spark_parallelism_feat_v2.csv`。
+- 输出 SVG + PNG 到 `reports/figures/`。
+- 为代表性混淆矩阵重跑 `sklearn LR` 的 v1/all 与 v2/all 5-fold out-of-fold 预测,不改变已有 Table 2 指标。
+- 在脚本中设置 `MPLCONFIGDIR=/tmp/mlsystem-matplotlib`,避免 sandbox 下 Matplotlib home config 不可写的 warning。
+
+执行命令:
+
+```bash
+python -m src.experiments.run_p1_visualizations
+```
+
+### 产物
+
+| 文件 stem | 内容 |
+|---|---|
+| `p1_table2_metric_bars` | Macro-F1 / QWK / Balanced Accuracy 的 v1 vs v2 跨系统对比 |
+| `p1_system_costs` | `feat_v2/all` 训练耗时与单行推理延迟(log scale) |
+| `p1_a6_spark_parallelism` | Spark `local[4]/[8]/[20]` wall time 与进程树 RSS |
+| `p1_a5_coverage` | actigraphy fold 覆盖率 + class 分布,标出 fold 4 无 class 3 |
+| `p1_confusion_sklearn_lr` | `sklearn LR` v1/all 与 v2/all out-of-fold 混淆矩阵 |
+| `p1_feature_lineage` | pandas streaming 与 Spark applyInPandas 的 feat_v2 特征 lineage |
+
+每个 stem 均生成 `.svg` 与 `.png`,共 12 个文件。
+
+### 验证
+
+- `python -m compileall -q src scripts` 通过。
+- `python -m src.experiments.run_p1_visualizations` 成功生成全部图。
+- PNG 像素非空检查通过。
+- 人工抽查 `p1_table2_metric_bars`、`p1_a5_coverage`、`p1_a6_spark_parallelism`、`p1_confusion_sklearn_lr`、`p1_feature_lineage`:布局清晰,无明显裁切;lineage 初版右侧裁切已修正后重生成。
+
+### 当前进度同步
+
+- W3 已完成 A5、A6 与核心可视化。
+- P1 已具备中期材料所需的核心证据链:主表结果、Spark 特征阶段对比、覆盖率解释、并行度曲线、系统开销图和 lineage 图。
+- 下一步可选两条:继续补 A1-A4 轻量消融,或转入中期报告/PPT 骨架整理。
+
+---
+
 ## 2026-06-03 - W3 A5:actigraphy 覆盖率/子集分析
 
 ### 目标

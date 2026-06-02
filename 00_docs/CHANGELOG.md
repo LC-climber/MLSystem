@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-03 — W3 P1 核心可视化落地
+
+把 P1 已完成结果转为中期汇报/论文可用图件。
+
+- 新增 `src/experiments/run_p1_visualizations.py`:统一生成 Table 2 指标图、系统开销图、A5 覆盖率图、A6 并行度曲线、代表性混淆矩阵和 feat_v2 lineage 图。
+- 新增 `reports/figures/`:6 张图,每张同时保存 `.svg` 和 `.png`,共 12 个文件。
+- 混淆矩阵图使用 `sklearn LR` 的 v1/all 与 v2/all 5-fold out-of-fold 预测,用于解释主表类别混淆,不改变 Table 2 指标。
+- 更新 `PROGRESS.md`:当前状态改为 A5/A6 + 核心可视化已完成,下一步建议转中期材料或补 A1-A4。
+- 更新 `PROJECT_LOG.md`:追加可视化流水、图用途和验证记录。
+
+---
+
 ## 2026-06-03 — W3 A5 actigraphy 覆盖率分析落地
 
 推进 P1 W3 的 A5 覆盖率/子集分析,把 `feat_v2/all` 主表未稳定提升的原因写成可复现证据链。

@@ -4,7 +4,7 @@
 > 时间线流水日志见 [`PROJECT_LOG.md`](./PROJECT_LOG.md);方案与实验设计见 [`v2/03_plan_p1_v2.md`](./v2/03_plan_p1_v2.md)。
 >
 > **更新时间**:2026-06-03 · **当前阶段**:W3 消融与可视化
-> **一句话**:P1 多系统算法对比主表已完成;W3 已完成 A5 覆盖率分析与 A6 Spark 并行度扫描,下一步推进 A1-A4 与可视化。
+> **一句话**:P1 多系统算法对比主表已完成;W3 已完成 A5/A6 和核心可视化,下一步推进 A1-A4 或整理中期材料。
 
 ---
 
@@ -27,7 +27,8 @@
 | feat_v2 actigraphy 子集 | 已完成(补充) | `reports/p1_systemwise_feat_v2_actigraphy.csv`;996 样本,作为 A5/覆盖率分析素材 |
 | W3 A5 actigraphy 覆盖率分析 | 已完成 | `reports/p1_ablation_a5_coverage.csv`;`reports/p1_ablation_a5_fold_coverage.csv` |
 | W3 A6 Spark 并行度扫描 | 已完成 | `reports/p1_spark_parallelism_feat_v2.csv`;`local[4]/[8]/[20]` 均等价,但并行度越高越慢且更耗内存 |
-| W3 其余消融与可视化 | 待开始 | A1-A4、雷达图、混淆矩阵、pandas vs Spark lineage/流程图 |
+| W3 核心可视化 | 已完成 | `reports/figures/`;Table 2 指标、系统开销、A5 覆盖率、A6 并行度、代表性混淆矩阵、lineage |
+| W3 其余消融 | 待开始 | A1-A4;`feat_v3_fusion` 可选 |
 
 ---
 
@@ -138,15 +139,32 @@ actigraphy 子集 5-fold 风险:
 - `v2/actigraphy` 子集只回答"有真实 actigraphy 的人群上表现如何",不能替代主表:样本数降到 996,且 fold 4 没有 class 3 验证样本。
 - 因此对论文/汇报的表述应是:actigraphy 特征工程已可复现且与 Spark 等价,但当前覆盖率与类别稀疏使其没有转化成稳定主表收益;子集结果作为覆盖率敏感性分析而不是主结论。
 
+### 2.7 W3 核心可视化
+
+来源:`python -m src.experiments.run_p1_visualizations`,输出到 `reports/figures/`,每张图同时保存 `.svg` 和 `.png`。
+
+| 图 | 用途 |
+|---|---|
+| `p1_table2_metric_bars` | Table 2 的 Macro-F1 / QWK / Balanced Accuracy 跨系统对比 |
+| `p1_system_costs` | `feat_v2/all` 训练耗时与单行推理延迟,突出 Spark 训练/推理开销 |
+| `p1_a6_spark_parallelism` | A6 `local[4]/[8]/[20]` wall time 与 RSS 曲线 |
+| `p1_a5_coverage` | A5 fold 覆盖率与 actigraphy 子集 class 分布 |
+| `p1_confusion_sklearn_lr` | 代表性 `sklearn LR` v1/all vs v2/all out-of-fold 混淆矩阵 |
+| `p1_feature_lineage` | pandas streaming 与 Spark applyInPandas 的 feat_v2 特征 lineage |
+
+验证:
+- 12 个图像文件(6 张 x SVG/PNG)均已生成。
+- PNG 像素非空检查通过。
+- 抽查 `p1_table2_metric_bars`、`p1_a5_coverage`、`p1_a6_spark_parallelism`、`p1_confusion_sklearn_lr`、`p1_feature_lineage` 无明显遮挡或裁切。
+
 ---
 
 ## 3. 当前待办
 
 1. **W3 消融与可视化**
-   - A1-A4 消融;A5 覆盖率分析与 A6 Spark `local[4]/[8]/[20]` 并行度扫描已完成。
-   - 跨系统雷达图、混淆矩阵、pandas vs Spark lineage/流程图。
+   - A1-A4 消融;A5 覆盖率分析、A6 并行度扫描与核心可视化已完成。
    - `feat_v3_fusion` 可选,不阻塞 P1 主结论。
-   - 下一步建议先做可视化,因为 P1 主结论与关键消融 A5/A6 已具备。
+   - 下一步建议整理中期材料/报告骨架,或选择性补 A1-A4 轻量消融。
 
 ---
 
@@ -165,6 +183,7 @@ git status -s
 python -m src.experiments.run_p1_feature_stage --mlflow
 python -m src.experiments.run_p1_ablation_a5_coverage
 python -m src.experiments.run_p1_spark_parallelism --mlflow
+python -m src.experiments.run_p1_visualizations
 python -m src.experiments.run_p1_systemwise --feature v2 --mlflow
 python -m src.experiments.run_p1_systemwise --feature v2 --cohort actigraphy --mlflow
 ```
