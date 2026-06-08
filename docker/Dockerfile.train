@@ -1,0 +1,55 @@
+"""
+Docker 容器化配置 - 训练服务
+
+GPU 版本训练镜像，支持 CUDA。
+"""
+
+# 使用 NVIDIA CUDA 基础镜像
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04 AS base
+
+# 安装 Python 3.11
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    gcc \
+    g++ \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置 Python 3.11 为默认
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+WORKDIR /app
+
+# 阶段 2: 依赖安装
+FROM base AS dependencies
+
+# 复制依赖文件
+COPY docker/requirements-train.txt .
+
+# 安装 PyTorch 和其他依赖
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir torch==2.9.0+cu128 -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip install --no-cache-dir -r requirements-train.txt
+
+# 阶段 3: 应用构建
+FROM dependencies AS application
+
+# 复制应用代码
+COPY src/ /app/src/
+COPY scripts/ /app/scripts/
+COPY data/ /app/data/
+
+# 创建输出目录
+RUN mkdir -p /app/models /app/reports /app/logs
+
+# 设置环境变量
+ENV PYTHONPATH=/app
+ENV MLFLOW_TRACKING_URI=http://mlflow:5000
+ENV CUDA_VISIBLE_DEVICES=0
+
+# 默认命令
+CMD ["bash"]

@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # MLflow 追踪服务器
+  mlflow:
+    image: python:3.11-slim
+    container_name: piu-mlflow
+    working_dir: /mlflow
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./mlruns.db:/mlflow/mlruns.db
+      - ./mlruns_artifacts:/mlflow/mlruns_artifacts
+    ports:
+      - "5000:5000"
+    command: >
+      sh -c "pip install mlflow==2.8.1 &&
+             mlflow server
+             --backend-store-uri sqlite:////mlflow/mlruns.db
+             --default-artifact-root /mlflow/mlruns_artifacts
+             --host 0.0.0.0
+             --port 5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - piu-network
+
+  # 推理服务
+  inference:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.infer
+    container_name: piu-inference
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MODEL_ALIAS=champion
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - piu-network
+
+  # 训练服务（可选，需要 GPU）
+  # train:
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/Dockerfile.train
+  #   container_name: piu-train
+  #   runtime: nvidia
+  #   environment:
+  #     - MLFLOW_TRACKING_URI=http://mlflow:5000
+  #     - CUDA_VISIBLE_DEVICES=0
+  #   volumes:
+  #     - ../data:/app/data
+  #     - ../models:/app/models
+  #     - ../reports:/app/reports
+  #   depends_on:
+  #     - mlflow
+  #   networks:
+  #     - piu-network
+
+networks:
+  piu-network:
+    driver: bridge
+
+volumes:
+  mlflow-data:
