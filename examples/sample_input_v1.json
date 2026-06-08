@@ -1,0 +1,20 @@
+{
+  "version": "v1",
+  "description": "示例输入 - 12岁男孩，中度 PIU 风险",
+  "input": {
+    "age": 12.5,
+    "sex": 1,
+    "bmi": 18.5,
+    "height": 150.0,
+    "weight": 45.0,
+    "waist_circumference": 70.0,
+    "diastolic_bp": 70.0,
+    "systolic_bp": 110.0,
+    "cgas_score": 75.0
+  },
+  "expected_prediction": {
+    "prediction": 1,
+    "prediction_label": "Mild",
+    "confidence": "> 0.3"
+  }
+}

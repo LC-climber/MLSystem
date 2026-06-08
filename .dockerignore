@@ -1,0 +1,75 @@
+# .dockerignore - 排除不必要的文件
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Git
+.git/
+.gitignore
+
+# 文档（构建时不需要）
+00_docs/
+*.md
+!docker/README.md
+!src/deployment/README.md
+
+# 测试
+tests/
+.pytest_cache/
+
+# 日志和临时文件
+logs/
+*.log
+tmp/
+temp/
+
+# 数据文件（通过挂载提供）
+data/raw/
+data/interim/
+data/external/
+
+# 报告和可视化
+reports/
+figures/
+
+# MLflow 和 Optuna 数据库（通过挂载提供）
+mlruns/
+mlruns.db
+mlruns_artifacts/
+optuna.db
+
+# 模型文件（通过挂载提供）
+models/*.pkl
+models/*.joblib
+models/*.pt
+
+# 会话总结
+SESSION*.md
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

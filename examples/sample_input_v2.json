@@ -1,0 +1,27 @@
+{
+  "version": "v2",
+  "description": "示例输入 - 包含 actigraphy 数据",
+  "input": {
+    "age": 13.0,
+    "sex": 0,
+    "bmi": 19.2,
+    "height": 155.0,
+    "weight": 46.0,
+    "cgas_score": 68.0,
+    "actigraphy_features": {
+      "act_mean_enmo": 35.2,
+      "act_std_enmo": 12.5,
+      "act_min_enmo": 0.0,
+      "act_max_enmo": 250.0,
+      "act_night_enmo_mean": 5.2,
+      "act_day_enmo_mean": 45.8,
+      "act_n_days": 7,
+      "act_n_records": 10080
+    }
+  },
+  "expected_prediction": {
+    "prediction": 2,
+    "prediction_label": "Moderate",
+    "confidence": "> 0.35"
+  }
+}
