@@ -1,10 +1,10 @@
 # 项目进展快照(PROGRESS)
 
 > **本文件定位**:随时覆盖更新的「现在在哪 / 下一步去哪」状态快照。
-> 时间线流水日志见 [`PROJECT_LOG.md`](./PROJECT_LOG.md);方案与实验设计见 [`v2/03_plan_p1_v2.md`](./v2/03_plan_p1_v2.md)。
+> 时间线流水日志见 [`PROJECT_LOG.md`](./PROJECT_LOG.md);方案与实验设计见 [`v2/03_plan_p1_v2.md`](./v2/03_plan_p1_v2.md)、[`v2/04_plan_p2_v2.md`](./v2/04_plan_p2_v2.md)。
 >
-> **更新时间**:2026-06-03 · **当前阶段**:W3 消融与可视化
-> **一句话**:P1 多系统算法对比主表、A5/A6、核心可视化和明天汇报材料均已完成;下一步可补 A1-A4 或切入 P2。
+> **更新时间**:2026-06-08 · **当前阶段**:P2 MLOps 实施中
+> **一句话**:P1 已完成并汇报;P2 阶段 1 (MLflow 深度集成) 已落地,包含 tracking/registry/artifacts 工具包和 Optuna 集成框架;下一步注册 baseline 并启动超参优化。
 
 ---
 
@@ -29,7 +29,13 @@
 | W3 A6 Spark 并行度扫描 | 已完成 | `reports/p1_spark_parallelism_feat_v2.csv`;`local[4]/[8]/[20]` 均等价,但并行度越高越慢且更耗内存 |
 | W3 核心可视化 | 已完成 | `reports/figures/`;Table 2 指标、系统开销、A5 覆盖率、A6 并行度、代表性混淆矩阵、lineage |
 | P1 中期汇报材料 | 已完成 | 报告、讲稿、Q&A、13 页 PPTX、动画 HTML 均已完成 |
-| W3 其余消融 | 待开始 | A1-A4;`feat_v3_fusion` 可选 |
+| **P2 MLflow 工具包** | **已完成** | `src/mlflow_utils/{tracking,registry,artifacts}.py`;统一实验追踪、模型注册、别名管理 |
+| **P2 Optuna 集成** | **已完成** | `src/experiments/run_p2_optuna.py`;100 trials 超参优化框架 |
+| **P2 Baseline 注册** | 待执行 | `scripts/register_baseline.py`;P1 最佳模型注册为 baseline 别名 |
+| P2 Champion 模型 | 待训练 | Optuna 优化后选定 champion |
+| P2 推理服务 | 待开始 | FastAPI + `/predict` 端点 |
+| P2 容器化 | 待开始 | Dockerfile (训练 + 推理) |
+| P2 模型发布 | 待开始 | ModelScope + HuggingFace Hub |
 
 ---
 

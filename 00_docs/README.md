@@ -1,51 +1,124 @@
 # 00_docs/ — 课程项目文档库
 
-中国科学院大学《机器学习系统》课程项目(2026 春)的全部文档归档。本目录按**迭代轮次**组织,每一轮的产出物物理隔离,迭代关系与决策线索集中在 [CHANGELOG.md](./CHANGELOG.md)。
+本目录归档中国科学院大学《机器学习系统》课程项目(2026 春)的方案、进度、实验记录和汇报材料。项目主线为 Kaggle `Child Mind Institute — Problematic Internet Use (PIU)`,当前文档库已经从早期选题方案推进到 P1 中期汇报材料落地阶段。
+
+## 当前快照
+
+> 更新时间:2026-06-03
+> 当前阶段:P1 W3 消融、可视化与中期汇报材料已完成;下一步可补 A1-A4 轻量消融或切入 P2 MLOps。
+
+| 模块 | 状态 | 主要证据 |
+|---|---|---|
+| PIU 数据与切分 | 已完成 | `../data/raw/`, `../data/splits/stratified_group_kfold_seed42.csv` |
+| `feat_v1_tabular` | 已完成 | `../data/processed/feat_v1__seed42.parquet` |
+| `feat_v2_biosensing` | 已完成 | `../data/processed/feat_v2__cpu__seed42.parquet`, `../data/processed/feat_v2__spark__seed42.parquet` |
+| P1 Table 1 | 已完成 | `../reports/p1_feature_stage_feat_v2.csv` |
+| P1 Table 2 | 已完成 | `../reports/p1_systemwise_table2.csv` |
+| A5 覆盖率分析 | 已完成 | `../reports/p1_ablation_a5_coverage.csv`, `../reports/p1_ablation_a5_fold_coverage.csv` |
+| A6 Spark 并行度扫描 | 已完成 | `../reports/p1_spark_parallelism_feat_v2.csv` |
+| W3 核心可视化 | 已完成 | `../reports/figures/` |
+| P1 中期汇报材料 | 已完成 | `P1_MIDTERM_REPORT.md`, `P1_MIDTERM_TALK_TRACK.md`, `P1_MIDTERM_QA.md`, `../reports/p1_midterm_slides.pptx`, `../reports/p1_midterm_explainer.html` |
+| P2 MLOps | 设计已定,实现待推进 | `v2/04_plan_p2_v2.md` |
+
+最新状态以 `PROGRESS.md` 为准;流水细节看 `PROJECT_LOG.md`;文档版本变更看 `CHANGELOG.md`。
 
 ## 目录结构
 
 ```
 00_docs/
-├── README.md           # 本文件:目录导览
-├── CHANGELOG.md        # 迭代时间线与决策记录
-├── v1/                 # 第一轮(2026-04-16):初版立项,主线 HAR
-│   ├── README.md
-│   ├── mlsys_project_charter_v1.md
-│   ├── kaggle_competition_candidates_v1.md
-│   ├── memos/          # 5 份决策便函
-│   └── plans/          # 6 份并列子方案 + 1 份 portfolio 索引
-├── v2/                 # 第二轮(2026-04-18):收敛优化,主线 PIU(当前活跃)
-│   ├── README.md
-│   ├── 01_overview_v2.md
-│   ├── 02_charter_v2.md
-│   ├── 03_plan_p1_v2.md
-│   ├── 04_plan_p2_v2.md
-│   ├── 05_runbook_v2.md
-│   └── 06_risk_and_eval_v2.md
+├── README.md                    # 本文件:文档库入口、当前状态和阅读路径
+├── PROGRESS.md                  # 当前进展快照:现在在哪 / 下一步去哪
+├── PROJECT_LOG.md               # 开发流水日志:按日期追加实验、脚本、产物和验证记录
+├── CHANGELOG.md                 # 文档库迭代记录:按文档版本和材料新增倒序记录
+├── P1_MIDTERM_REPORT.md         # P1 中期汇报报告:问题、协议、Table 1/2、A5/A6、结论
+├── P1_MIDTERM_TALK_TRACK.md     # P1 中期汇报讲稿提示:8-10 分钟逐页讲法
+├── P1_MIDTERM_QA.md             # P1 答辩 Q&A:Spark、feat_v2、公平性、P2 衔接等
+├── Snipaste_2026-05-29_12-48-11.png
+├── v1/                          # 第一轮(2026-04-16):初版立项和候选题归档
+├── v2/                          # 第二轮(2026-04-18):PIU 主线方案与执行手册
 └── templates/
-    └── mlsys_memo_template.md
+    └── mlsys_memo_template.md   # 决策便函模板
 ```
 
-## 当前活跃版本
-
-**v2**(2026-04-18 起)。新成员、新决策、新便函全部以 v2 为基准。
-
-v1 文档保留为只读归档,用于答辩时展示选题和路线收敛过程,不再更新。
+`reports/` 不在本目录下,但它是 `00_docs/` 的主要外部产物目录:表格、图、PPTX、HTML 动画页均放在 `../reports/`。
 
 ## 推荐阅读路径
 
-- **新组员入门**:从 [v2/README.md](./v2/README.md) 开始,按其中给出的 6 份文件顺序读完即可开机。
-- **了解决策过程**:先读 [CHANGELOG.md](./CHANGELOG.md),再按需查看 [v1/](./v1/) 中的便函。
-- **答辩准备**:[v2/01_overview_v2.md](./v2/01_overview_v2.md) §5 的"v1→v2 优化对照表"可直接作为问答素材。
-- **追踪历史决策**:[v1/memos/](./v1/memos/) 中 5 份便函按时间顺序记录了 2026-04-16 当天 5 次关键决策。
+### 只想知道当前进度
 
-## 文档命名约定
+1. `PROGRESS.md`:看当前状态表、关键指标、待办和开机备忘。
+2. `P1_MIDTERM_REPORT.md`:看已经形成的 P1 汇报叙事和结论。
+3. `../reports/p1_midterm_slides.pptx`:直接查看可汇报版本。
 
-- v 系列产出物均带 `_v{N}` 后缀,N 单调递增。
-- 便函命名:`memo_YYYYMMDD_<topic>_v{N}.md`,模板见 [templates/mlsys_memo_template.md](./templates/mlsys_memo_template.md)。
-- 跨版本文件保持文件名稳定,只在不同版本目录下并存,便于 diff。
+### 要复现实验或继续开发
 
-## 后续迭代
+1. `PROGRESS.md`:确认哪些脚本已经跑通、哪些产物是权威输入。
+2. `PROJECT_LOG.md`:按日期追踪脚本新增、命令、失败原因、验证记录。
+3. `v2/05_runbook_v2.md`:看环境、数据、MLflow、磁盘和 fallback 说明。
+4. `../Makefile`:看根目录可用命令;注意当前实际环境以 `openpi_311` 为准。
 
-- 中期答辩前(预计 2026-05 下旬)可能产生 v3,届时新建 `v3/` 目录,旧版自动归档。
-- 课程作业最终交付物(报告 / PPT / 视频脚本)按 `reports/` `slides/` 等子目录组织,届时在本 README 与 CHANGELOG 中追加。
+### 要理解项目设计
+
+1. `v2/01_overview_v2.md`:总览 v1 到 v2 的收敛过程。
+2. `v2/02_charter_v2.md`:课程项目立项书。
+3. `v2/03_plan_p1_v2.md`:P1 多系统 PIU 风险识别实验设计。
+4. `v2/04_plan_p2_v2.md`:P2 MLflow / MLOps / 双渠道发布设计。
+5. `v2/06_risk_and_eval_v2.md`:风险登记与评价协议。
+
+### 要准备答辩
+
+1. `P1_MIDTERM_REPORT.md`:主线叙事和关键表。
+2. `P1_MIDTERM_TALK_TRACK.md`:逐页讲法和时间预算。
+3. `P1_MIDTERM_QA.md`:高概率追问口径。
+4. `CHANGELOG.md`:回答"为什么从 v1 改到 v2"以及"最近新增了什么"。
+
+### 要追溯历史决策
+
+1. `CHANGELOG.md`:先看倒序时间线。
+2. `v1/README.md`:了解第一轮文档结构。
+3. `v1/memos/`:查看 2026-04-16 的 5 份决策便函。
+4. `v1/plans/`:查看 ChildMind / NFL / HMS 并列方案以及最终为何收敛到 PIU。
+
+## 顶层文档角色
+
+| 文件 | 角色 | 更新方式 |
+|---|---|---|
+| `PROGRESS.md` | 当前状态快照,覆盖更新 | 每次阶段性推进后重写或补充关键状态 |
+| `PROJECT_LOG.md` | 开发流水,保留完整过程 | 按日期追加,记录命令、产物、指标、验证 |
+| `CHANGELOG.md` | 文档库变更记录 | 当新增/重组文档或汇报材料时追加 |
+| `README.md` | 文档库入口 | 当顶层文档、阅读路径或当前阶段变化时更新 |
+| `P1_MIDTERM_REPORT.md` | 中期汇报报告 | 汇报前可微调,汇报后只做勘误 |
+| `P1_MIDTERM_TALK_TRACK.md` | 讲稿提示 | 随 PPT 页序调整 |
+| `P1_MIDTERM_QA.md` | 答辩问答 | 随新问题追加 |
+
+## 当前 P1 结论索引
+
+- 核心问题:Spark 应该放在 ML pipeline 的哪一段,而不是只问模型分数谁最高。
+- Table 1:actigraphy 特征阶段 pandas streaming 为 38.13s / 0.65GB,Spark `applyInPandas local[8]` 为 114.01s / 13.25GB;两者数值等价。
+- Table 2:三系统 x 两算法 x 两特征版本共 12 行已完成;Spark 在小表格训练与单样本推理阶段没有优势。
+- A5:`feat_v2` 主表没有稳定提升,主要受 actigraphy 覆盖率限制。全体覆盖 996/3960=25.2%,有标签覆盖 996/2736=36.4%,fold 4 的 actigraphy 子集没有 class 3。
+- A6:Spark local mode 并行度不是越高越好。`local[4]` 最快,`local[20]` 最慢且 RSS 最高。
+- 汇报口径:Spark 的合理位置更接近大规模特征/ETL 阶段,但具体实现仍需要匹配数据形态、聚合算法和部署模式。
+
+## 版本关系
+
+### v2 当前方案基线
+
+`v2/` 是当前主线方案目录。它定义了 PIU 作为主线、P1/P2 分工、环境/数据/指标/风险协议。注意:`v2/` 是 2026-04-18 的方案基线,当前实验状态已经由 `PROGRESS.md`、`PROJECT_LOG.md` 和 P1 中期材料进一步推进。
+
+### v1 只读归档
+
+`v1/` 保留第一轮选题与计划过程,用于说明项目从 HAR / NFL / HMS / PIU 多候选收敛到 PIU 的原因。除非补充勘误,不再更新 v1 内容。
+
+### 未来 v3
+
+只有在 P2 MLOps 路线、最终报告结构或项目交付范围发生系统性重排时才新建 `v3/`。普通实验推进继续更新 `PROGRESS.md` 与 `PROJECT_LOG.md`,不需要新建版本目录。
+
+## 维护规则
+
+- 当前事实写入 `PROGRESS.md`,不要只更新聊天记录或临时笔记。
+- 实验过程写入 `PROJECT_LOG.md`,包括失败路径和验证命令。
+- 文档结构或交付物变化写入 `CHANGELOG.md`。
+- P1 中期材料已经可用;若修改报告、PPT 或 Q&A,同步更新 `CHANGELOG.md` 和 `PROJECT_LOG.md`。
+- v1 保持只读;v2 保持方案基线,除非发现明显错误或需要补充"实际落地变更"说明。
+- 所有涉及指标的结论应指向具体 CSV、脚本或图件,避免只写口头判断。

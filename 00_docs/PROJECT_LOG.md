@@ -11,6 +11,71 @@
 
 ---
 
+## 2026-06-08 - P2 阶段 1: MLflow 深度集成启动
+
+### 背景
+
+P1 中期汇报已完成(2026-06-03)，当前进入 P2 MLOps 实践阶段。P2 目标是构建完整的 MLOps 闭环，包括 MLflow Registry、Optuna 超参优化、FastAPI 推理服务、Docker 容器化和双渠道模型发布。
+
+### 当前阶段目标
+
+实施 P2 阶段 1: MLflow 深度集成，建立完整的实验追踪和模型注册体系。
+
+### 新增模块
+
+#### 1. MLflow 工具包 (`src/mlflow_utils/`)
+
+| 文件 | 功能 | 关键接口 |
+|------|------|----------|
+| `tracking.py` | 增强的实验追踪 | `log_experiment()`, `log_cv_results()`, `log_confusion_matrix()`, `log_feature_importance()`, `log_training_curve()`, `log_pr_curve()` |
+| `registry.py` | Model Registry 管理 | `init_registry()`, `register_model()`, `set_alias()`, `get_model_by_alias()`, `promote_model()`, `list_models_by_tag()`, `get_model_metadata()` |
+| `artifacts.py` | Artifact 管理 | `save_model_summary()`, `create_model_card()`, `save_inference_script()`, `save_input_example()` |
+
+**设计要点**:
+- 统一的实验记录接口，自动记录参数、指标、可视化
+- 4 个模型别名体系: `baseline`(P1 最佳)、`candidate`(Optuna 当前最佳)、`champion`(正式发布)、`demo`(轻量演示版)
+- 自动生成 Model Card、推理脚本等发布材料
+- 支持模型晋升逻辑 (candidate → champion)
+
+#### 2. Baseline 注册脚本 (`scripts/register_baseline.py`)
+
+**功能**:
+- 从 P1 报告 CSV 中自动选择最佳模型 (按 QWK 排序)
+- 在 MLflow 中搜索对应的 run
+- 注册到 Model Registry 并设置 `baseline` 别名
+- 保存 baseline 信息到 `models/baseline_info.json`
+
+**使用方式**:
+```bash
+# 查看选择结果（不实际注册）
+python scripts/register_baseline.py --dry-run
+
+# 实际注册 baseline
+python scripts/register_baseline.py
+```
+
+### 代码质量检查
+
+```bash
+python -m compileall -q src/mlflow_utils/ scripts/register_baseline.py
+```
+
+✓ 所有文件语法检查通过。
+
+### 下一步计划
+
+1. **验证 MLflow 工具**: 重跑一个 P1 实验，验证增强的 tracking 功能
+2. **注册 baseline**: 运行 `register_baseline.py`，建立对比基准
+3. **启动 Optuna 集成**: 开发 `run_p2_optuna.py`，集成超参数优化
+
+### 预期产物
+
+- MLflow UI 中出现 `piu-risk` 注册模型
+- `baseline` 别名指向 P1 最佳模型
+- 增强的可视化 (混淆矩阵、PR 曲线、训练曲线)
+
+---
+
 ## 2026-06-03 - P1 中期汇报材料
 
 ### 目标
