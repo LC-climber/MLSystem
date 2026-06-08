@@ -23,10 +23,9 @@ import pandas as pd
 from src.data.feature_engineering import load_feat_v1, load_feat_v2
 from src.data.splits import load_fold_assignment
 from src.training.cv import run_cv
-from src.models.torch_baselines import PyTorchMLP
-from src.config import MLFLOW_TRACKING_URI, MLFLOW_EXPERIMENT_P2, SEED
+from src.models.configurable_torch_mlp import ConfigurableTorchMLP  # 使用可配置版本
+from src.config import MLFLOW_TRACKING_URI, MLFLOW_EXPERIMENT_P2, SEED, TARGET_CLASSES
 from src.data.constants import ID_COL, TARGET_COL
-from src.mlflow_utils.tracking import log_experiment
 from src.mlflow_utils.registry import register_model
 
 # 配置日志
@@ -71,20 +70,21 @@ def objective(
     max_epochs = 100
     patience = 10
 
-    # 构建模型超参数
-    model_params = {
-        "hidden_dims": [hidden_dim_1, hidden_dim_2],
-        "dropout": dropout,
-        "learning_rate": lr,
-        "weight_decay": weight_decay,
-        "batch_size": batch_size,
-        "max_epochs": max_epochs,
-        "patience": patience,
-        "device": "cuda",  # 使用 GPU
-    }
-
     # 创建模型实例
-    model = PyTorchMLP(**model_params)
+    num_classes = len(TARGET_CLASSES)
+    model = ConfigurableTorchMLP(
+        num_classes=num_classes,
+        hidden_dim_1=hidden_dim_1,
+        hidden_dim_2=hidden_dim_2,
+        dropout=dropout,
+        learning_rate=lr,
+        weight_decay=weight_decay,
+        batch_size=batch_size,
+        max_epochs=max_epochs,
+        patience=patience,
+        device="cuda",
+        seed=SEED,
+    )
 
     # 启动 MLflow run
     with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}"):
@@ -100,15 +100,15 @@ def objective(
         mlflow.set_tag("optuna_study", trial.study.study_name)
 
         try:
-            # 运行 CV
+            # 运行 CV（使用 P1 的 run_cv 接口）
             results = run_cv(
-                model=model,
-                X=X,
-                y=y,
-                fold_df=fold_df,
-                n_folds=n_folds,
-                compute_metrics=True,
-                track_system_metrics=False,  # 减少开销
+                model_factory=lambda: model,
+                feat_df=merged,
+                assignment=merged[[ID_COL, 'fold', TARGET_COL]],
+                n_splits=n_folds,
+                seed=SEED,
+                preprocess=False,  # 数据已经预处理
+                measure_system=False,  # 减少开销
             )
 
             # 提取 QWK mean
@@ -176,12 +176,15 @@ def run_optuna_optimization(
     else:
         raise ValueError(f"Unknown feature version: {feature_version}")
 
-    # 加载 fold 分配
+    # 加载 fold 分配（包含 id, sii, fold）
     fold_df = load_fold_assignment()
 
-    # 合并并过滤有标签的样本
-    merged = feat_df.merge(fold_df, on=ID_COL, how='inner')
-    merged = merged[merged[TARGET_COL].notna()].copy()
+    # feat_df 可能包含 sii 列，需要删除以避免重复
+    if TARGET_COL in feat_df.columns:
+        feat_df = feat_df.drop(columns=[TARGET_COL])
+
+    # 合并：fold_df 提供标签和 fold，feat_df 提供特征
+    merged = fold_df.merge(feat_df, on=ID_COL, how='inner')
 
     # 提取特征和标签
     exclude_cols = [ID_COL, TARGET_COL, 'fold']
@@ -189,7 +192,6 @@ def run_optuna_optimization(
 
     X_all = merged[feature_cols].values
     y_all = merged[TARGET_COL].values.astype(int)
-    fold_df = merged[[ID_COL, 'fold', TARGET_COL]]
 
     logger.info(f"Data shape: {X_all.shape}")
     logger.info(f"Classes: {np.unique(y_all)}")
