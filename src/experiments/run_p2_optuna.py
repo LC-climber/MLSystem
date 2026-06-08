@@ -19,11 +19,13 @@ from optuna.pruners import MedianPruner
 import logging
 from typing import Dict, Any
 
-from src.data.loader import load_training_data
-from src.data.splits import load_splits
+import pandas as pd
+from src.data.feature_engineering import load_feat_v1, load_feat_v2
+from src.data.splits import load_fold_assignment
 from src.training.cv import run_cv
 from src.models.torch_baselines import PyTorchMLP
 from src.config import MLFLOW_TRACKING_URI, MLFLOW_EXPERIMENT_P2, SEED
+from src.data.constants import ID_COL, TARGET_COL
 from src.mlflow_utils.tracking import log_experiment
 from src.mlflow_utils.registry import register_model
 
@@ -165,8 +167,29 @@ def run_optuna_optimization(
 
     # 加载数据
     logger.info("Loading data...")
-    X_all, y_all, feature_names = load_training_data(feature_version=feature_version)
-    fold_df = load_splits()
+
+    # 根据 feature version 加载对应的特征
+    if feature_version == "v1":
+        feat_df = load_feat_v1()
+    elif feature_version == "v2":
+        feat_df = load_feat_v2()
+    else:
+        raise ValueError(f"Unknown feature version: {feature_version}")
+
+    # 加载 fold 分配
+    fold_df = load_fold_assignment()
+
+    # 合并并过滤有标签的样本
+    merged = feat_df.merge(fold_df, on=ID_COL, how='inner')
+    merged = merged[merged[TARGET_COL].notna()].copy()
+
+    # 提取特征和标签
+    exclude_cols = [ID_COL, TARGET_COL, 'fold']
+    feature_cols = [c for c in merged.columns if c not in exclude_cols]
+
+    X_all = merged[feature_cols].values
+    y_all = merged[TARGET_COL].values.astype(int)
+    fold_df = merged[[ID_COL, 'fold', TARGET_COL]]
 
     logger.info(f"Data shape: {X_all.shape}")
     logger.info(f"Classes: {np.unique(y_all)}")
