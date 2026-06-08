@@ -1,183 +1,263 @@
-# 下一步立即行动清单
+# 下一步行动指南
 
-**更新时间**: 2026-06-08
-**当前阶段**: P2 阶段 1 完成，准备启动阶段 2
-
----
-
-## 🎯 推荐执行路径：方案 2（快速推进）
-
-### ✅ Step 1: 环境确认
-
-```bash
-# 激活环境
-conda activate openpi_311
-
-# 确认 MLflow 运行
-curl http://localhost:5000/health
-# 如未运行，执行: bash scripts/start_mlflow.sh &
-```
-
-### ⏳ Step 2: Optuna 小规模测试（10 trials）
-
-```bash
-# 创建日志目录
-mkdir -p logs
-
-# 运行 10 trials 测试（3-fold CV，约 30-60 分钟）
-python -m src.experiments.run_p2_optuna \
-  --feature v2 \
-  --trials 10 \
-  --study-name test-optuna \
-  --folds 3
-```
-
-**预期结果**: 10 个 trials 完成，产生 best trial
-
-### ⏳ Step 3: 查看结果并注册 baseline
-
-```bash
-# 查看 Optuna 结果
-python -c "
-import optuna
-study = optuna.load_study('test-optuna', storage='sqlite:///optuna.db')
-print(f'Best trial: {study.best_trial.number}')
-print(f'Best QWK: {study.best_value:.4f}')
-print(f'Best params: {study.best_trial.params}')
-"
-
-# 从 MLflow UI 找到 best trial 对应的 run_id
-# 访问 http://localhost:5000 → piu-p2-mlops experiment
-# 按 val_qwk_mean 排序，复制最佳 run 的 ID
-
-# 注册为 baseline
-python -c "
-from src.mlflow_utils.registry import register_model
-register_model(
-    run_id='<best_run_id>',  # 替换为实际 run_id
-    model_name='piu-risk',
-    alias='baseline',
-    description='Initial baseline from 10-trial Optuna test',
-    tags={'phase': 'p2', 'source': 'optuna_test'}
-)
-"
-
-# 验证
-python -c "
-from src.mlflow_utils.registry import get_model_by_alias
-model = get_model_by_alias('piu-risk', 'baseline')
-print('✓ Baseline model loaded successfully')
-"
-```
-
-### ⏳ Step 4: 启动完整 Optuna 优化（100 trials）
-
-```bash
-# 后台运行（预计 4-6 小时）
-nohup python -m src.experiments.run_p2_optuna \
-  --feature v2 \
-  --trials 100 \
-  --study-name piu-mlp-v2 \
-  --folds 5 \
-  > logs/optuna_v2_$(date +%Y%m%d_%H%M%S).log 2>&1 &
-
-# 记录进程 ID
-echo $! > logs/optuna_pid.txt
-
-# 监控进度
-tail -f logs/optuna_v2_*.log
-
-# 或者使用 Optuna Dashboard
-# pip install optuna-dashboard
-# optuna-dashboard sqlite:///optuna.db --port 8080
-```
-
-### ⏳ Step 5: 选定 champion（Optuna 完成后）
-
-```bash
-# 查看最终结果
-python -c "
-import optuna
-study = optuna.load_study('piu-mlp-v2', storage='sqlite:///optuna.db')
-print(f'Completed trials: {len(study.trials)}')
-print(f'Best trial: {study.best_trial.number}')
-print(f'Best QWK: {study.best_value:.4f}')
-print(f'Best params:')
-for key, value in study.best_trial.params.items():
-    print(f'  {key}: {value}')
-"
-
-# 从 MLflow 找到 best trial 的 run_id，注册为 champion
-python -c "
-from src.mlflow_utils.registry import register_model
-register_model(
-    run_id='<best_run_id>',
-    model_name='piu-risk',
-    alias='champion',
-    description='Best model from 100-trial Optuna optimization',
-    tags={'phase': 'p2', 'source': 'optuna_full', 'trials': '100'}
-)
-"
-```
+**更新时间**: 2026-06-08 19:32  
+**当前进度**: 57%  
+**目标进度**: 100%
 
 ---
 
-## 📅 时间预算
+## 🎯 立即可执行（今日）
 
-| 步骤 | 预计时间 | 可并行 |
-|------|----------|--------|
-| Step 1: 环境确认 | 5 分钟 | - |
-| Step 2: 10 trials 测试 | 30-60 分钟 | - |
-| Step 3: 注册 baseline | 10 分钟 | - |
-| Step 4: 100 trials 完整优化 | 4-6 小时 | ✅ 后台运行 |
-| Step 5: 选定 champion | 15 分钟 | - |
+### 1. Docker 测试
+```bash
+cd /home/er/桌面/MLsystem
+bash docker/test_docker.sh
+```
 
-**今天可完成**: Step 1-3 + 启动 Step 4
-**明天查看**: Step 4 结果 + Step 5
+**预期结果**:
+- ✓ 推理镜像构建成功
+- ✓ docker-compose配置有效
+- ✓ 服务启动正常
+- ✓ 健康检查通过
+
+**预计时间**: 10-15 分钟
 
 ---
 
-## 🔄 进度追踪
+### 2. FastAPI E2E 测试
+```bash
+# 先启动服务
+cd docker && docker-compose up -d
 
-- [ ] Step 1: 环境确认 ✅
-- [ ] Step 2: 10 trials 测试完成
-- [ ] Step 3: baseline 注册成功
-- [ ] Step 4: 100 trials 启动（后台）
-- [ ] Step 5: champion 选定
+# 运行测试
+cd ..
+python tests/test_e2e_api.py
+```
+
+**预期结果**:
+- ✓ 健康检查通过
+- ✓ v1/v2 预测成功
+- ✓ 错误处理正常
+- ✓ 响应时间 < 1秒
+
+**预计时间**: 5-10 分钟
 
 ---
 
-## 🆘 故障排查
+## 📅 短期计划（1-2天）
 
-### 问题 1: Optuna 报错 "cannot import module"
-```bash
-# 确认当前目录
-pwd  # 应该在 /home/er/桌面/MLsystem
+### Day 1: 测试与验证 (+8% → 65%)
 
-# 确认环境
-which python  # 应该在 openpi_311 环境
+#### 上午任务
+1. **运行 Docker 测试**
+   - 验证镜像构建
+   - 检查服务启动
+   - 记录测试结果
 
-# 确认模块可导入
-python -c "from src.experiments.run_p2_optuna import main; print('✓ Import OK')"
-```
+2. **运行 E2E 测试**
+   - 测试所有API端点
+   - 验证错误处理
+   - 性能基准测试
 
-### 问题 2: GPU OOM
-```bash
-# 减少 batch size 或使用 CPU
-# 修改 run_p2_optuna.py 中 device 参数为 "cpu"
-```
+#### 下午任务
+3. **问题修复**
+   - 修复测试发现的问题
+   - 优化性能瓶颈
+   - 更新文档
 
-### 问题 3: MLflow 连接失败
-```bash
-# 检查 MLflow server
-curl http://localhost:5000/health
-
-# 重启
-pkill -f "mlflow server"
-bash scripts/start_mlflow.sh &
-```
+4. **文档更新**
+   - 更新 PROGRESS.md
+   - 补充 PROJECT_LOG.md
+   - 记录测试结果
 
 ---
 
-**当前状态**: P2 阶段 1 完成，工具包就绪
-**下一里程碑**: 完成 Optuna 优化，选定 champion 模型
+### Day 2: Champion 准备 (+7% → 72%)
+
+#### 上午任务
+1. **启动 Optuna 优化**
+   ```bash
+   nohup python -m src.experiments.run_p2_optuna \
+     --feature v2 \
+     --trials 100 \
+     --folds 5 \
+     > logs/optuna_full.log 2>&1 &
+   ```
+
+2. **监控训练**
+   - 查看日志进度
+   - 监控GPU使用
+   - 估计完成时间
+
+#### 下午任务
+3. **准备 Baseline 注册**
+   ```bash
+   python scripts/register_baseline.py
+   ```
+
+4. **准备发布材料**
+   - 生成 Model Card
+   - 准备示例代码
+   - 整理可视化图表
+
+---
+
+## 📆 中期计划（3-5天）
+
+### Day 3: Champion 选定 (+5% → 77%)
+
+**条件**: Optuna 优化完成
+
+1. **性能对比**
+   - 分析 Optuna 结果
+   - 对比 Baseline vs Champion
+   - 决策最终模型
+
+2. **模型注册**
+   - 注册 Champion 到 MLflow
+   - 添加 champion 别名
+   - 生成完整 Model Card
+
+3. **验证测试**
+   - 加载 Champion 模型
+   - 推理测试
+   - 性能基准
+
+---
+
+### Day 4-5: 模型发布 (+15% → 92%)
+
+#### ModelScope 发布
+1. **账号准备**
+   - 注册 ModelScope 账号
+   - 创建模型仓库
+
+2. **文件准备**
+   - 导出模型权重
+   - 生成 Model Card
+   - 准备示例代码
+
+3. **上传发布**
+   - Git LFS 配置
+   - 上传模型文件
+   - 配置仓库信息
+
+4. **测试验证**
+   - 在线推理测试
+   - 下载测试
+
+#### HuggingFace Hub 发布
+1. **账号准备**
+   - 注册 HuggingFace 账号
+   - 配置 CLI 认证
+
+2. **文件准备**
+   - 转换 HF 格式
+   - 配置 Model Card
+
+3. **上传发布**
+   - 创建仓库
+   - 上传模型
+   - 配置 tags
+
+4. **测试验证**
+   - from_pretrained 测试
+   - 推理验证
+
+---
+
+## 📆 长期计划（6-7天）
+
+### Day 6: 最终报告 (+10% → 100%)
+
+1. **实验总结**
+   - P1 结果整理
+   - P2 流程总结
+   - 性能对比分析
+
+2. **技术报告**
+   - MLOps 实践总结
+   - 技术栈说明
+   - 架构设计文档
+
+3. **文档完善**
+   - 更新 README
+   - 整理所有文档
+   - 生成目录索引
+
+---
+
+### Day 7: 答辩准备
+
+1. **PPT 制作**
+   - 项目背景
+   - 技术方案
+   - 实验结果
+   - 演示 Demo
+
+2. **演示准备**
+   - Docker 一键启动
+   - API 调用演示
+   - 模型推理展示
+
+3. **Q&A 准备**
+   - 常见问题
+   - 技术细节
+   - 改进方向
+
+---
+
+## 🚨 风险应对
+
+### 风险1: Docker 测试失败
+**应对**:
+- 检查依赖版本
+- 查看错误日志
+- 简化镜像配置
+
+### 风险2: Optuna 无显著提升
+**应对**:
+- 使用 Baseline 作为 Champion
+- 分析优化过程
+- 记录经验教训
+
+### 风险3: 模型发布遇阻
+**应对**:
+- 准备本地部署方案
+- 使用 Docker Hub
+- 私有仓库备选
+
+---
+
+## 📊 进度检查点
+
+| 日期 | 检查点 | 目标进度 |
+|------|--------|----------|
+| 2026-06-08 ✅ | 冲刺启动 | 57% |
+| 2026-06-09 | 测试完成 | 65% |
+| 2026-06-10 | Champion选定 | 77% |
+| 2026-06-12 | 模型发布 | 92% |
+| 2026-06-13 | 报告完成 | 100% |
+
+---
+
+## 💡 最佳实践
+
+### 每日工作流
+1. 查看 NEXT_STEPS.md
+2. 执行当日任务
+3. 记录到 PROJECT_LOG.md
+4. 更新 PROGRESS.md
+5. Git commit & push
+
+### 遇到问题时
+1. 记录问题现象
+2. 查看相关文档
+3. 搜索错误信息
+4. 尝试不同方案
+5. 记录解决方法
+
+---
+
+**维护者**: 项目团队  
+**更新频率**: 每日或重大进展时
