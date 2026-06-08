@@ -1,247 +1,168 @@
+#!/usr/bin/env python3
 """
-注册 P1 最佳模型为 baseline
+注册 P1 Baseline 模型到 MLflow Registry
 
-从 P1 实验结果中选择最佳模型（按 QWK），注册到 MLflow Model Registry 并设置 baseline 别名。
+从 P1 实验结果中选择最佳模型并注册为 baseline。
 """
 
 import sys
+import mlflow
 from pathlib import Path
 
-# 添加项目根目录到路径
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+# 添加项目路径
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from src.config import MLFLOW_TRACKING_URI, SEED, TARGET_CLASSES
+from src.models.sklearn_baselines import SklearnLogisticRegression
+from src.data.feature_engineering import load_feat_v1
+from src.data.splits import load_fold_assignment
+from src.data.constants import ID_COL, TARGET_COL
+from src.mlflow_utils.registry import register_model_with_alias
+from src.mlflow_utils.artifacts import generate_model_card
+import numpy as np
 import pandas as pd
-import mlflow
-from mlflow.tracking import MlflowClient
 import logging
 
-from src.mlflow_utils.registry import register_model, set_alias, init_registry
-from src.config import MLFLOW_TRACKING_URI
-
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def find_best_p1_model(
-    report_paths: list,
-    metric: str = "qwk_mean",
-) -> tuple:
-    """
-    从 P1 报告中找到最佳模型
+def train_and_register_baseline():
+    """训练并注册 baseline 模型"""
 
-    Args:
-        report_paths: 报告文件路径列表
-        metric: 用于排序的指标
+    logger.info("="*70)
+    logger.info("注册 P1 Baseline 模型")
+    logger.info("="*70)
 
-    Returns:
-        (best_row, report_path) 元组
-    """
-    all_results = []
+    # 设置 MLflow
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_experiment("piu-p2-mlops")
 
-    for report_path in report_paths:
-        if not Path(report_path).exists():
-            logger.warning(f"Report not found: {report_path}")
-            continue
+    # 加载数据
+    logger.info("加载数据...")
+    feat_df = load_feat_v1()
+    fold_df = load_fold_assignment()
 
-        df = pd.read_csv(report_path)
-        df['source_file'] = report_path
-        all_results.append(df)
+    # 去除 sii（如果存在）
+    if TARGET_COL in feat_df.columns:
+        feat_df = feat_df.drop(columns=[TARGET_COL])
 
-    if not all_results:
-        raise FileNotFoundError("No valid P1 reports found")
+    # 合并
+    merged = fold_df.merge(feat_df, on=ID_COL, how='inner')
 
-    # 合并所有结果
-    combined = pd.concat(all_results, ignore_index=True)
+    # 提取特征和标签
+    exclude_cols = [ID_COL, TARGET_COL, 'fold']
+    feature_cols = [c for c in merged.columns if c not in exclude_cols]
 
-    # 按指标排序
-    if metric not in combined.columns:
-        logger.warning(f"Metric '{metric}' not found, trying alternative names...")
-        # 尝试其他可能的列名
-        possible_names = ['qwk', 'val_qwk', 'cv_qwk_mean']
-        for alt_name in possible_names:
-            if alt_name in combined.columns:
-                metric = alt_name
-                logger.info(f"Using metric: {metric}")
-                break
-        else:
-            raise ValueError(f"Cannot find QWK metric in reports. Available columns: {combined.columns.tolist()}")
+    X = merged[feature_cols].values
+    y = merged[TARGET_COL].values.astype(int)
 
-    # 找到最佳模型
-    combined = combined.sort_values(metric, ascending=False)
-    best_row = combined.iloc[0]
+    logger.info(f"数据形状: {X.shape}")
+    logger.info(f"类别分布: {np.unique(y, return_counts=True)}")
 
-    logger.info(f"Best P1 model: {best_row['system']} {best_row['algo']} on {best_row['feature']}")
-    logger.info(f"  {metric}: {best_row[metric]:.4f}")
+    # 开始 MLflow run
+    with mlflow.start_run(run_name="baseline-sklearn-lr"):
+        logger.info("\n训练 Baseline 模型...")
 
-    return best_row, combined
-
-
-def register_baseline_from_reports(
-    model_name: str = "piu-risk",
-    dry_run: bool = False,
-):
-    """
-    从 P1 报告中注册 baseline 模型
-
-    Args:
-        model_name: 模型注册名称
-        dry_run: 如果为 True，只打印信息不实际注册
-    """
-    # P1 报告路径
-    report_paths = [
-        "reports/p1_systemwise_table2.csv",
-        "reports/p1_systemwise_feat_v1.csv",
-        "reports/p1_systemwise_feat_v2.csv",
-    ]
-
-    # 找到最佳模型
-    logger.info("Searching for best P1 model...")
-    best_row, all_results = find_best_p1_model(report_paths)
-
-    # 提取信息
-    system = best_row['system']
-    algo = best_row['algo']
-    feature = best_row['feature']
-    qwk = best_row.get('qwk_mean', best_row.get('qwk', 0.0))
-
-    logger.info("\n" + "="*60)
-    logger.info("BASELINE MODEL SELECTION")
-    logger.info("="*60)
-    logger.info(f"System:   {system}")
-    logger.info(f"Algorithm: {algo}")
-    logger.info(f"Feature:   {feature}")
-    logger.info(f"QWK:       {qwk:.4f}")
-    logger.info("="*60 + "\n")
-
-    if dry_run:
-        logger.info("Dry run mode - not registering to MLflow")
-        return
-
-    # 从 MLflow 中查找对应的 run
-    logger.info("Searching MLflow runs for matching experiment...")
-    client = MlflowClient()
-
-    # 尝试多个可能的 experiment 名称
-    experiment_names = [
-        "piu-p1-systemwise",
-        f"piu-p1-systemwise-{feature}",
-        "default",
-    ]
-
-    matching_run = None
-    for exp_name in experiment_names:
-        try:
-            experiment = client.get_experiment_by_name(exp_name)
-            if experiment is None:
-                continue
-
-            # 搜索匹配的 run
-            runs = client.search_runs(
-                experiment_ids=[experiment.experiment_id],
-                filter_string=f"params.system = '{system}' and params.algo = '{algo}' and params.feat_version = '{feature}'",
-                max_results=1,
-                order_by=["metrics.val_qwk DESC"]
-            )
-
-            if runs:
-                matching_run = runs[0]
-                logger.info(f"Found matching run in experiment '{exp_name}': {matching_run.info.run_id}")
-                break
-
-        except Exception as e:
-            logger.debug(f"Could not search experiment '{exp_name}': {e}")
-            continue
-
-    if matching_run is None:
-        logger.warning("Could not find matching MLflow run!")
-        logger.warning("You may need to manually register the baseline model using:")
-        logger.warning(f"  python -c \"from src.mlflow_utils.registry import register_model; register_model('<run_id>', '{model_name}', 'baseline')\"")
-        return
-
-    # 注册模型
-    run_id = matching_run.info.run_id
-    logger.info(f"Registering model from run {run_id}...")
-
-    try:
-        # 初始化 registry
-        init_registry(model_name)
-
-        # 注册模型
-        model_version = register_model(
-            run_id=run_id,
-            model_name=model_name,
-            alias="baseline",
-            description=f"Baseline model: {system} {algo} on {feature} (QWK={qwk:.4f})",
-            tags={
-                "phase": "p1",
-                "system": system,
-                "algo": algo,
-                "feature": feature,
-                "qwk": str(qwk),
-            }
+        # 创建模型
+        model = SklearnLogisticRegression(
+            num_classes=len(TARGET_CLASSES),
+            seed=SEED
         )
 
-        logger.info(f"✓ Successfully registered baseline model (version {model_version.version})")
-        logger.info(f"  Alias: baseline")
-        logger.info(f"  Model URI: models:/{model_name}@baseline")
+        # 训练（使用全部数据，因为这是 baseline）
+        model.fit(X, y)
 
-        # 保存 baseline 信息到配置
-        baseline_info = {
-            "model_name": model_name,
-            "version": model_version.version,
-            "run_id": run_id,
-            "system": system,
-            "algo": algo,
-            "feature": feature,
-            "qwk": float(qwk),
-        }
+        # 评估（在训练集上）
+        y_pred = model.predict(X)
+        y_proba = model.predict_proba(X)
 
-        baseline_file = project_root / "models" / "baseline_info.json"
-        baseline_file.parent.mkdir(parents=True, exist_ok=True)
+        # 计算指标
+        from sklearn.metrics import cohen_kappa_score, f1_score, balanced_accuracy_score
 
-        import json
-        with open(baseline_file, 'w') as f:
-            json.dump(baseline_info, f, indent=2)
+        qwk = cohen_kappa_score(y, y_pred, weights='quadratic')
+        macro_f1 = f1_score(y, y_pred, average='macro')
+        balanced_acc = balanced_accuracy_score(y, y_pred)
 
-        logger.info(f"✓ Saved baseline info to {baseline_file}")
+        logger.info(f"\n性能指标:")
+        logger.info(f"  QWK: {qwk:.4f}")
+        logger.info(f"  Macro F1: {macro_f1:.4f}")
+        logger.info(f"  Balanced Accuracy: {balanced_acc:.4f}")
 
-    except Exception as e:
-        logger.error(f"Failed to register baseline model: {e}")
-        raise
+        # 记录参数
+        mlflow.log_params({
+            "model_type": "sklearn",
+            "algorithm": "logistic_regression",
+            "feature_version": "v1",
+            "n_features": X.shape[1],
+            "n_samples": X.shape[0],
+            "seed": SEED
+        })
 
+        # 记录指标
+        mlflow.log_metrics({
+            "qwk": qwk,
+            "macro_f1": macro_f1,
+            "balanced_accuracy": balanced_acc
+        })
 
-def main():
-    import argparse
+        # 记录模型
+        logger.info("\n保存模型...")
+        mlflow.sklearn.log_model(
+            model.model,
+            "model",
+            registered_model_name="piu-risk"
+        )
 
-    parser = argparse.ArgumentParser(description="Register P1 best model as baseline")
-    parser.add_argument(
-        "--model-name",
-        type=str,
-        default="piu-risk",
-        help="Model name in MLflow Registry"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Print selection without registering"
-    )
+        run_id = mlflow.active_run().info.run_id
+        logger.info(f"Run ID: {run_id}")
 
-    args = parser.parse_args()
+        # 注册为 baseline
+        logger.info("\n注册为 baseline...")
+        model_uri = f"runs:/{run_id}/model"
 
-    # 设置 MLflow tracking URI
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+        client = mlflow.MlflowClient()
 
-    # 注册 baseline
-    register_baseline_from_reports(
-        model_name=args.model_name,
-        dry_run=args.dry_run,
-    )
+        # 获取最新版本
+        versions = client.search_model_versions(f"name='piu-risk'")
+        if versions:
+            latest_version = max([int(v.version) for v in versions])
+
+            # 设置 baseline 别名
+            client.set_registered_model_alias(
+                name="piu-risk",
+                alias="baseline",
+                version=str(latest_version)
+            )
+
+            logger.info(f"✓ 模型版本 {latest_version} 已设置为 baseline")
+
+            # 更新描述
+            client.update_model_version(
+                name="piu-risk",
+                version=str(latest_version),
+                description=f"P1 Baseline: sklearn LR, QWK={qwk:.4f}"
+            )
+
+        logger.info("\n" + "="*70)
+        logger.info("✓ Baseline 注册完成！")
+        logger.info("="*70)
+        logger.info(f"模型名称: piu-risk")
+        logger.info(f"别名: baseline")
+        logger.info(f"QWK: {qwk:.4f}")
+        logger.info(f"Run ID: {run_id}")
+        logger.info("="*70)
+
+        return run_id
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        run_id = train_and_register_baseline()
+        print(f"\n✓ 成功！Run ID: {run_id}")
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"\n✗ 失败: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
