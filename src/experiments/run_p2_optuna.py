@@ -38,9 +38,8 @@ logger = logging.getLogger(__name__)
 
 def objective(
     trial: optuna.Trial,
-    X: np.ndarray,
-    y: np.ndarray,
-    fold_df,
+    feat_df: pd.DataFrame,
+    fold_df: pd.DataFrame,
     feature_version: str,
     n_folds: int = 5,
 ) -> float:
@@ -49,8 +48,7 @@ def objective(
 
     Args:
         trial: Optuna trial 对象
-        X: 特征矩阵
-        y: 标签向量
+        feat_df: 特征 DataFrame
         fold_df: Fold 分配 DataFrame
         feature_version: 特征版本
         n_folds: CV 折数
@@ -58,6 +56,19 @@ def objective(
     Returns:
         目标指标值 (QWK mean)
     """
+
+    # 合并数据
+    merged = fold_df.merge(feat_df, on=ID_COL, how='inner')
+
+    # 填充 NaN（使用中位数）
+    exclude_cols = [ID_COL, TARGET_COL, 'fold']
+    feature_cols = [c for c in merged.columns if c not in exclude_cols]
+
+    # 检查并填充 NaN
+    for col in feature_cols:
+        if merged[col].isnull().any():
+            median_val = merged[col].median()
+            merged[col] = merged[col].fillna(median_val)
     # 定义搜索空间
     hidden_dim_1 = trial.suggest_categorical("hidden_dim_1", [64, 128, 256, 512])
     hidden_dim_2 = trial.suggest_categorical("hidden_dim_2", [32, 64, 128, 256])
@@ -111,15 +122,20 @@ def objective(
                 measure_system=False,  # 减少开销
             )
 
-            # 提取 QWK mean
-            qwk_mean = results["cv_metrics"]["qwk_mean"]
-            qwk_std = results["cv_metrics"]["qwk_std"]
+            # 提取指标（从 results 字典中）
+            # run_cv 返回格式：{'metrics': {'qwk_mean': ..., 'qwk_std': ...}, ...}
+            metrics = results.get('metrics', results)  # 兼容不同返回格式
+
+            qwk_mean = metrics.get('qwk_mean', metrics.get('qwk', 0.0))
+            qwk_std = metrics.get('qwk_std', 0.0)
+            macro_f1_mean = metrics.get('macro_f1_mean', metrics.get('macro_f1', 0.0))
+            balanced_accuracy_mean = metrics.get('balanced_accuracy_mean', metrics.get('balanced_accuracy', 0.0))
 
             # 记录指标
             mlflow.log_metric("val_qwk_mean", qwk_mean)
             mlflow.log_metric("val_qwk_std", qwk_std)
-            mlflow.log_metric("val_macro_f1_mean", results["cv_metrics"]["macro_f1_mean"])
-            mlflow.log_metric("val_balanced_accuracy_mean", results["cv_metrics"]["balanced_accuracy_mean"])
+            mlflow.log_metric("val_macro_f1_mean", macro_f1_mean)
+            mlflow.log_metric("val_balanced_accuracy_mean", balanced_accuracy_mean)
 
             logger.info(f"Trial {trial.number}: QWK = {qwk_mean:.4f} ± {qwk_std:.4f}")
 
@@ -220,8 +236,7 @@ def run_optuna_optimization(
         study.optimize(
             lambda trial: objective(
                 trial,
-                X=X_all,
-                y=y_all,
+                feat_df=feat_df,
                 fold_df=fold_df,
                 feature_version=feature_version,
                 n_folds=n_folds,
