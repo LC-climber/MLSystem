@@ -24,6 +24,8 @@ DATA_SPLITS_DIR = DATA_DIR / "splits"
 
 MODELS_DIR = PROJECT_ROOT / "models"
 REPORTS_DIR = PROJECT_ROOT / "reports"
+P1_REPORTS_DIR = REPORTS_DIR / "P1"
+P2_REPORTS_DIR = REPORTS_DIR / "P2"
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 
 # ============================================================================

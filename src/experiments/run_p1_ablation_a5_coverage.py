@@ -6,14 +6,14 @@ Table 2 despite adding 47 actigraphy features: only a subset has real actigraphy
 coverage, and the actigraphy-only cohort is smaller and class-imbalanced.
 
 Inputs:
-  - reports/p1_systemwise_table2.csv
-  - reports/p1_systemwise_feat_v2_actigraphy.csv
+  - reports/P1/p1_systemwise_table2.csv
+  - reports/P1/p1_systemwise_feat_v2_actigraphy.csv
   - data/processed/feat_v2__cpu__seed42.parquet
   - data/splits/stratified_group_kfold_seed42.csv
 
 Outputs:
-  - reports/p1_ablation_a5_coverage.csv
-  - reports/p1_ablation_a5_fold_coverage.csv
+  - reports/P1/p1_ablation_a5_coverage.csv
+  - reports/P1/p1_ablation_a5_fold_coverage.csv
 
 Usage:
   python -m src.experiments.run_p1_ablation_a5_coverage
@@ -27,7 +27,7 @@ sys.path.insert(0, str(project_root))
 
 import pandas as pd
 
-from src.config import REPORTS_DIR, TARGET_CLASSES
+from src.config import P1_REPORTS_DIR, TARGET_CLASSES
 from src.data.constants import ID_COL
 from src.data.feature_engineering import load_feat_v2
 from src.data.splits import load_fold_assignment
@@ -36,10 +36,10 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-TABLE2_FILE = REPORTS_DIR / "p1_systemwise_table2.csv"
-ACTIGRAPHY_FILE = REPORTS_DIR / "p1_systemwise_feat_v2_actigraphy.csv"
-OUT_FILE = REPORTS_DIR / "p1_ablation_a5_coverage.csv"
-FOLD_OUT_FILE = REPORTS_DIR / "p1_ablation_a5_fold_coverage.csv"
+TABLE2_FILE = P1_REPORTS_DIR / "p1_systemwise_table2.csv"
+ACTIGRAPHY_FILE = P1_REPORTS_DIR / "p1_systemwise_feat_v2_actigraphy.csv"
+OUT_FILE = P1_REPORTS_DIR / "p1_ablation_a5_coverage.csv"
+FOLD_OUT_FILE = P1_REPORTS_DIR / "p1_ablation_a5_fold_coverage.csv"
 
 METRICS = {
     "macro_f1_mean": "macro_f1",

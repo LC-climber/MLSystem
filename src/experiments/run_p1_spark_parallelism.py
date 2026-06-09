@@ -26,7 +26,7 @@ sys.path.insert(0, str(project_root))
 
 import pandas as pd
 
-from src.config import REPORTS_DIR, SPARK_CONFIG
+from src.config import P1_REPORTS_DIR, SPARK_CONFIG
 from src.data.actigraphy_features import FEAT_V2_CPU_FILE, FEAT_V2_SPARK_FILE
 from src.data.preprocess_actigraphy_spark import build_feat_v2_spark
 from src.experiments.run_p1_feature_stage import (
@@ -44,7 +44,7 @@ from src.utils.spark import stop_spark
 
 logger = get_logger(__name__)
 
-OUT_FILE = REPORTS_DIR / "p1_spark_parallelism_feat_v2.csv"
+OUT_FILE = P1_REPORTS_DIR / "p1_spark_parallelism_feat_v2.csv"
 DEFAULT_MASTERS = "local[4],local[8],local[20]"
 
 

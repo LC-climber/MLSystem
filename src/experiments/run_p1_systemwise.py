@@ -25,7 +25,7 @@ sys.path.insert(0, str(project_root))
 import pandas as pd
 
 from src.config import (
-    SEED, N_SPLITS, REPORTS_DIR, TARGET_CLASSES,
+    SEED, N_SPLITS, P1_REPORTS_DIR, TARGET_CLASSES,
     MLFLOW_TRACKING_URI, MLFLOW_EXPERIMENT_P1, PROJECT_ROOT,
 )
 from src.data.constants import ID_COL
@@ -159,7 +159,7 @@ def _log_mlflow(mlflow, probe, result, n_folds, feat_version, feature_slug, coho
 
 
 def _write_table(results, feature_slug: str, cohort: str, feat_version: str):
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    P1_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     rows = []
     for r in results:
         system, algo = _model_parts(r["model_name"])
@@ -174,7 +174,7 @@ def _write_table(results, feature_slug: str, cohort: str, feat_version: str):
         })
     df = pd.DataFrame(rows)
     suffix = feature_slug if cohort == "all" else f"{feature_slug}_{cohort}"
-    out = REPORTS_DIR / f"p1_systemwise_{suffix}.csv"
+    out = P1_REPORTS_DIR / f"p1_systemwise_{suffix}.csv"
     write_csv(df, out)
     logger.info("wrote %s", out)
 

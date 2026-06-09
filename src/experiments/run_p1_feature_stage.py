@@ -33,7 +33,7 @@ from src.config import (
     MLFLOW_EXPERIMENT_P1,
     MLFLOW_TRACKING_URI,
     PROJECT_ROOT,
-    REPORTS_DIR,
+    P1_REPORTS_DIR,
     SPARK_CONFIG,
 )
 from src.data.actigraphy_features import (
@@ -49,7 +49,7 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-OUT_FILE = REPORTS_DIR / "p1_feature_stage_feat_v2.csv"
+OUT_FILE = P1_REPORTS_DIR / "p1_feature_stage_feat_v2.csv"
 EQUIV_THRESHOLD = 1e-6
 LOGICAL_HASH_DECIMALS = 9
 

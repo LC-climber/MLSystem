@@ -5,7 +5,7 @@ Requires:
   pip install python-pptx
 
 Output:
-  reports/p1_midterm_slides.pptx
+  reports/P1/p1_midterm_slides.pptx
 """
 
 from pathlib import Path
@@ -17,7 +17,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORTS = ROOT / "reports"
+REPORTS = ROOT / "reports" / "P1"
 FIGURES = REPORTS / "figures"
 OUT = REPORTS / "p1_midterm_slides.pptx"
 
@@ -274,9 +274,9 @@ def build():
     ], size=17)
     _bullets(s, 7.0, 2.65, 5.05, 3.25, [
         "交付物:00_docs/P1_MIDTERM_REPORT.md",
-        "交付物:reports/p1_midterm_slides.pptx",
-        "交付物:reports/p1_midterm_explainer.html",
-        "交付物:reports/figures/",
+        "交付物:reports/P1/p1_midterm_slides.pptx",
+        "交付物:reports/P1/p1_midterm_explainer.html",
+        "交付物:reports/P1/figures/",
     ], size=15.5, color=MUTED)
     slides.append(s)
 
@@ -310,9 +310,9 @@ def build():
         "报告:00_docs/P1_MIDTERM_REPORT.md",
         "讲稿:00_docs/P1_MIDTERM_TALK_TRACK.md",
         "Q&A:00_docs/P1_MIDTERM_QA.md",
-        "PPT:reports/p1_midterm_slides.pptx",
-        "HTML:reports/p1_midterm_explainer.html",
-        "图件:reports/figures/",
+        "PPT:reports/P1/p1_midterm_slides.pptx",
+        "HTML:reports/P1/p1_midterm_explainer.html",
+        "图件:reports/P1/figures/",
     ], size=14.5, color=MUTED)
     slides.append(s)
 

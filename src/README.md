@@ -86,7 +86,7 @@ python -m src.data.preprocess_actigraphy_spark
 
 | 文件 | 作用 |
 |---|---|
-| `run_p1_systemwise.py` | P1 Table 2 入口。按 feature/cohort/system 运行 sklearn / Spark / PyTorch 的 LR/MLP 5-fold CV,输出 `reports/p1_systemwise_*.csv`。 |
+| `run_p1_systemwise.py` | P1 Table 2 入口。按 feature/cohort/system 运行 sklearn / Spark / PyTorch 的 LR/MLP 5-fold CV,输出 `reports/P1/p1_systemwise_*.csv`。 |
 | `run_p1_feature_stage.py` | P1 Table 1 入口。比较 pandas streaming 与 Spark `applyInPandas` 构建 `feat_v2` 的耗时、RSS、hash 和数值等价性。 |
 | `run_p1_spark_parallelism.py` | W3 A6 入口。扫描 Spark `local[4] / local[8] / local[20]`,比较特征阶段并行度、RSS 和等价性。 |
 | `run_p1_ablation_a5_coverage.py` | W3 A5 入口。分析 actigraphy 覆盖率、fold 类别稀疏和 `v2/all - v1/all` 指标 delta。 |
@@ -136,12 +136,12 @@ data/raw/train.csv
   -> src.data.preprocess_actigraphy_spark    -> data/processed/feat_v2__spark__seed42.parquet
 
 data/processed/feat_v1|feat_v2 + data/splits
-  -> src.experiments.run_p1_systemwise       -> reports/p1_systemwise_*.csv
+  -> src.experiments.run_p1_systemwise       -> reports/P1/p1_systemwise_*.csv
 
-reports/*.csv
+reports/P1/*.csv
   -> src.experiments.run_p1_ablation_a5_coverage
   -> src.experiments.run_p1_spark_parallelism
-  -> src.experiments.run_p1_visualizations   -> reports/figures/
+  -> src.experiments.run_p1_visualizations   -> reports/P1/figures/
 ```
 
 ## 维护规则
@@ -151,4 +151,4 @@ reports/*.csv
 - 新增模型必须继承 `models.base.BaseModel`,否则不能接入共享 CV loop。
 - P1 指标计算只通过 `evaluation.metrics` 统一实现,避免不同脚本各算一套。
 - Spark 代码必须通过 `utils.spark.get_spark_session()` 获取 session,避免 Java/Python 版本和 driver memory 问题回归。
-- 生成的表格、图、模型和缓存不要放进 `src/`;输出应进入 `../data/processed/`、`../reports/`、`../models/` 或 MLflow artifact。
+- 生成的表格、图、模型和缓存不要放进 `src/`;输出应进入 `../data/processed/`、`../reports/<阶段>/`、`../models/` 或 MLflow artifact。

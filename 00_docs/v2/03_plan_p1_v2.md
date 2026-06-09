@@ -299,7 +299,7 @@ DoD: 对比表 2 的 feat_v1 部分(6 行)
 - `src/models/sklearn_baselines.py`、`src/models/spark_baselines.py`、`src/models/torch_baselines.py`
 - `src/experiments/run_p1_systemwise.py`(一键跑 12 行对比)
 - `notebooks/p1_eda.ipynb`、`notebooks/p1_ablation.ipynb`
-- `reports/p1/` 目录下的对比表 1、表 2、雷达图、混淆矩阵、并行度曲线
+- `reports/P1/` 目录下的对比表 1、表 2、雷达图、混淆矩阵、并行度曲线
 - 中期 PPT 草案(`00_docs/midterm_slides_outline_v1.md`)
 
 ## 14. 风险与应对(P1 专属,通用风险见 `06_risk_and_eval_v2.md`)

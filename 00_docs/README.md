@@ -12,12 +12,12 @@
 | PIU 数据与切分 | 已完成 | `../data/raw/`, `../data/splits/stratified_group_kfold_seed42.csv` |
 | `feat_v1_tabular` | 已完成 | `../data/processed/feat_v1__seed42.parquet` |
 | `feat_v2_biosensing` | 已完成 | `../data/processed/feat_v2__cpu__seed42.parquet`, `../data/processed/feat_v2__spark__seed42.parquet` |
-| P1 Table 1 | 已完成 | `../reports/p1_feature_stage_feat_v2.csv` |
-| P1 Table 2 | 已完成 | `../reports/p1_systemwise_table2.csv` |
-| A5 覆盖率分析 | 已完成 | `../reports/p1_ablation_a5_coverage.csv`, `../reports/p1_ablation_a5_fold_coverage.csv` |
-| A6 Spark 并行度扫描 | 已完成 | `../reports/p1_spark_parallelism_feat_v2.csv` |
-| W3 核心可视化 | 已完成 | `../reports/figures/` |
-| P1 中期汇报材料 | 已完成 | `P1_MIDTERM_REPORT.md`, `P1_MIDTERM_TALK_TRACK.md`, `P1_MIDTERM_QA.md`, `../reports/p1_midterm_slides.pptx`, `../reports/p1_midterm_explainer.html` |
+| P1 Table 1 | 已完成 | `../reports/P1/p1_feature_stage_feat_v2.csv` |
+| P1 Table 2 | 已完成 | `../reports/P1/p1_systemwise_table2.csv` |
+| A5 覆盖率分析 | 已完成 | `../reports/P1/p1_ablation_a5_coverage.csv`, `../reports/P1/p1_ablation_a5_fold_coverage.csv` |
+| A6 Spark 并行度扫描 | 已完成 | `../reports/P1/p1_spark_parallelism_feat_v2.csv` |
+| W3 核心可视化 | 已完成 | `../reports/P1/figures/` |
+| P1 中期汇报材料 | 已完成 | `P1_MIDTERM_REPORT.md`, `P1_MIDTERM_TALK_TRACK.md`, `P1_MIDTERM_QA.md`, `../reports/P1/p1_midterm_slides.pptx`, `../reports/P1/p1_midterm_explainer.html` |
 | P2 MLOps | 设计已定,实现待推进 | `v2/04_plan_p2_v2.md` |
 
 最新状态以 `PROGRESS.md` 为准;流水细节看 `PROJECT_LOG.md`;文档版本变更看 `CHANGELOG.md`。
@@ -40,7 +40,7 @@
     └── mlsys_memo_template.md   # 决策便函模板
 ```
 
-`reports/` 不在本目录下,但它是 `00_docs/` 的主要外部产物目录:表格、图、PPTX、HTML 动画页均放在 `../reports/`。
+`reports/` 不在本目录下,但它是 `00_docs/` 的主要外部产物目录。当前按阶段归档:P1 表格、图、PPTX、HTML 动画页放在 `../reports/P1/`;P2 优化、部署、监控与验收报告预留在 `../reports/P2/`。
 
 ## 推荐阅读路径
 
@@ -48,7 +48,7 @@
 
 1. `PROGRESS.md`:看当前状态表、关键指标、待办和开机备忘。
 2. `P1_MIDTERM_REPORT.md`:看已经形成的 P1 汇报叙事和结论。
-3. `../reports/p1_midterm_slides.pptx`:直接查看可汇报版本。
+3. `../reports/P1/p1_midterm_slides.pptx`:直接查看可汇报版本。
 
 ### 要复现实验或继续开发
 

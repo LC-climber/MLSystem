@@ -4,7 +4,7 @@ W3 P1 Visualization Runner
 Creates publication/PPT-ready figures from the completed P1 reports without
 retraining models.
 
-Outputs (SVG + PNG) under reports/figures/:
+Outputs (SVG + PNG) under reports/P1/figures/:
   - p1_table2_metric_bars
   - p1_system_costs
   - p1_a6_spark_parallelism
@@ -36,7 +36,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
-from src.config import N_SPLITS, REPORTS_DIR, SEED, TARGET_CLASSES
+from src.config import N_SPLITS, P1_REPORTS_DIR, SEED, TARGET_CLASSES
 from src.data.constants import ID_COL, TARGET_COL
 from src.data.feature_engineering import (
     get_feature_matrix_columns,
@@ -51,11 +51,11 @@ from src.utils.reproducibility import set_seed
 
 logger = get_logger(__name__)
 
-FIGURES_DIR = REPORTS_DIR / "figures"
-TABLE2_FILE = REPORTS_DIR / "p1_systemwise_table2.csv"
-A6_FILE = REPORTS_DIR / "p1_spark_parallelism_feat_v2.csv"
-A5_COVERAGE_FILE = REPORTS_DIR / "p1_ablation_a5_coverage.csv"
-A5_FOLD_FILE = REPORTS_DIR / "p1_ablation_a5_fold_coverage.csv"
+FIGURES_DIR = P1_REPORTS_DIR / "figures"
+TABLE2_FILE = P1_REPORTS_DIR / "p1_systemwise_table2.csv"
+A6_FILE = P1_REPORTS_DIR / "p1_spark_parallelism_feat_v2.csv"
+A5_COVERAGE_FILE = P1_REPORTS_DIR / "p1_ablation_a5_coverage.csv"
+A5_FOLD_FILE = P1_REPORTS_DIR / "p1_ablation_a5_fold_coverage.csv"
 
 SYSTEM_COLORS = {
     "sklearn": "#4C78A8",

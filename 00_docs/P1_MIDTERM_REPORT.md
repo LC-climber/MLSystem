@@ -56,7 +56,7 @@
 
 ## 4. Table 1:特征阶段 pandas vs Spark
 
-来源:`reports/p1_feature_stage_feat_v2.csv`
+来源:`reports/P1/p1_feature_stage_feat_v2.csv`
 
 | backend | 方法 | wall(s) | peak RSS(GB) | 等价性 |
 |---|---|---:|---:|---|
@@ -72,7 +72,7 @@
 
 ## 5. Table 2:三系统 x 两算法 x 两特征版本
 
-来源:`reports/p1_systemwise_table2.csv`
+来源:`reports/P1/p1_systemwise_table2.csv`
 
 ### 5.1 主表摘要
 
@@ -102,8 +102,8 @@ MLP 结果:
 ## 6. A5:actigraphy 覆盖率解释
 
 来源:
-- `reports/p1_ablation_a5_coverage.csv`
-- `reports/p1_ablation_a5_fold_coverage.csv`
+- `reports/P1/p1_ablation_a5_coverage.csv`
+- `reports/P1/p1_ablation_a5_fold_coverage.csv`
 
 同协议主表(`v2/all - v1/all`)下:
 
@@ -125,7 +125,7 @@ MLP 结果:
 
 ## 7. A6:Spark 并行度扫描
 
-来源:`reports/p1_spark_parallelism_feat_v2.csv`
+来源:`reports/P1/p1_spark_parallelism_feat_v2.csv`
 
 | Spark master | wall(s) | peak RSS(GB) | 等价性 |
 |---|---:|---:|---|
@@ -142,7 +142,7 @@ MLP 结果:
 
 ## 8. 可视化材料
 
-来源:`reports/figures/`
+来源:`reports/P1/figures/`
 
 | 图 | 汇报用途 |
 |---|---|
@@ -185,13 +185,13 @@ MLP 结果:
 | 类型 | 路径 |
 |---|---|
 | 报告文档 | `00_docs/P1_MIDTERM_REPORT.md` |
-| PPT | `reports/p1_midterm_slides.pptx` |
-| 动画 HTML | `reports/p1_midterm_explainer.html` |
-| 可视化图 | `reports/figures/` |
-| Table 1 | `reports/p1_feature_stage_feat_v2.csv` |
-| Table 2 | `reports/p1_systemwise_table2.csv` |
-| A5 | `reports/p1_ablation_a5_coverage.csv` |
-| A6 | `reports/p1_spark_parallelism_feat_v2.csv` |
+| PPT | `reports/P1/p1_midterm_slides.pptx` |
+| 动画 HTML | `reports/P1/p1_midterm_explainer.html` |
+| 可视化图 | `reports/P1/figures/` |
+| Table 1 | `reports/P1/p1_feature_stage_feat_v2.csv` |
+| Table 2 | `reports/P1/p1_systemwise_table2.csv` |
+| A5 | `reports/P1/p1_ablation_a5_coverage.csv` |
+| A6 | `reports/P1/p1_spark_parallelism_feat_v2.csv` |
 
 ---
 

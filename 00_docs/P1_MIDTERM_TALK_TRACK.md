@@ -1,7 +1,7 @@
 # P1 中期汇报讲稿提示(8-10 分钟)
 
 > 用途:明天汇报时放在旁边看,不是照读稿。  
-> 对应 PPT:`reports/p1_midterm_slides.pptx`  
+> 对应 PPT:`reports/P1/p1_midterm_slides.pptx`  
 > 推荐节奏:正文 10 页讲完,附录只在被问到时翻。
 
 ---

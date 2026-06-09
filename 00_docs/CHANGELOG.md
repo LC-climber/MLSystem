@@ -11,9 +11,9 @@
 - 新增 `00_docs/P1_MIDTERM_REPORT.md`:中期汇报报告骨架,覆盖问题定义、实验协议、Table 1、Table 2、A5、A6、讲稿建议和风险边界。
 - 新增 `00_docs/P1_MIDTERM_TALK_TRACK.md`:8-10 分钟逐页讲稿提示。
 - 新增 `00_docs/P1_MIDTERM_QA.md`:答辩 Q&A 备忘,覆盖 Spark、feat_v2、A5/A6、公平性和 P2 衔接。
-- 新增 `scripts/build_p1_midterm_ppt.py`:使用 `python-pptx` 从 `reports/figures/` 生成 PPTX。
-- 更新 `reports/p1_midterm_slides.pptx`:13 页中期汇报 PPT,含 2 页备用附录。
-- 新增 `reports/p1_midterm_explainer.html`:独立动画 HTML,用 6 步 pipeline 动画解释 Spark 在特征/ETL 阶段的作用与限制。
+- 新增 `scripts/build_p1_midterm_ppt.py`:使用 `python-pptx` 从 `reports/P1/figures/` 生成 PPTX。
+- 更新 `reports/P1/p1_midterm_slides.pptx`:13 页中期汇报 PPT,含 2 页备用附录。
+- 新增 `reports/P1/p1_midterm_explainer.html`:独立动画 HTML,用 6 步 pipeline 动画解释 Spark 在特征/ETL 阶段的作用与限制。
 - 更新 `envs/pinned_openpi_311_mlsys.txt`:补入 `python-pptx==1.0.2`、`lxml==6.1.1`、`xlsxwriter==3.2.9`。
 - 更新 `PROGRESS.md` 与 `PROJECT_LOG.md`:同步中期材料完成状态、验证记录和下一步建议。
 
@@ -24,7 +24,7 @@
 把 P1 已完成结果转为中期汇报/论文可用图件。
 
 - 新增 `src/experiments/run_p1_visualizations.py`:统一生成 Table 2 指标图、系统开销图、A5 覆盖率图、A6 并行度曲线、代表性混淆矩阵和 feat_v2 lineage 图。
-- 新增 `reports/figures/`:6 张图,每张同时保存 `.svg` 和 `.png`,共 12 个文件。
+- 新增 `reports/P1/figures/`:6 张图,每张同时保存 `.svg` 和 `.png`,共 12 个文件。
 - 混淆矩阵图使用 `sklearn LR` 的 v1/all 与 v2/all 5-fold out-of-fold 预测,用于解释主表类别混淆,不改变 Table 2 指标。
 - 更新 `PROGRESS.md`:当前状态改为 A5/A6 + 核心可视化已完成,下一步建议转中期材料或补 A1-A4。
 - 更新 `PROJECT_LOG.md`:追加可视化流水、图用途和验证记录。
@@ -36,8 +36,8 @@
 推进 P1 W3 的 A5 覆盖率/子集分析,把 `feat_v2/all` 主表未稳定提升的原因写成可复现证据链。
 
 - 新增 `src/experiments/run_p1_ablation_a5_coverage.py`:读取 Table 2 主表、`feat_v2/actigraphy` 子集表、feat_v2 parquet 和 fold assignment,生成覆盖率与指标 delta 汇总。
-- 新增 `reports/p1_ablation_a5_coverage.csv`:三系统 x 两算法的 `v2/all - v1/all` 主协议 delta,并附带 actigraphy 子集补充指标。
-- 新增 `reports/p1_ablation_a5_fold_coverage.csv`:记录 5-fold actigraphy 覆盖分布;标注样本覆盖率 36.4%,fold 4 的 actigraphy 子集 class 3 数为 0。
+- 新增 `reports/P1/p1_ablation_a5_coverage.csv`:三系统 x 两算法的 `v2/all - v1/all` 主协议 delta,并附带 actigraphy 子集补充指标。
+- 新增 `reports/P1/p1_ablation_a5_fold_coverage.csv`:记录 5-fold actigraphy 覆盖分布;标注样本覆盖率 36.4%,fold 4 的 actigraphy 子集 class 3 数为 0。
 - 更新 `PROGRESS.md`:新增 A5 结果摘要,当前待办收敛为 A1-A4 与可视化。
 - 更新 `PROJECT_LOG.md`:追加 2026-06-03 A5 流水,明确 actigraphy 子集只能作补充证据,不能替代 Table 2 主表。
 
@@ -48,7 +48,7 @@
 推进 P1 W3 的第一项消融 A6,把 Spark actigraphy 特征阶段从单点 `local[8]` 扩展为并行度扫描。
 
 - 新增 `src/experiments/run_p1_spark_parallelism.py`:扫描 `local[4]` / `local[8]` / `local[20]`,复用 Table 1 的进程树 RSS、逻辑 hash、NaN 感知 diff 与 MLflow fallback。
-- 新增 `reports/p1_spark_parallelism_feat_v2.csv`:三个 master 均完成且与 pandas reference 等价;`local[4]` 最快(115.48s / 12.42GB),`local[20]` 最慢且最耗内存(161.53s / 18.00GB)。
+- 新增 `reports/P1/p1_spark_parallelism_feat_v2.csv`:三个 master 均完成且与 pandas reference 等价;`local[4]` 最快(115.48s / 12.42GB),`local[20]` 最慢且最耗内存(161.53s / 18.00GB)。
 - 更新 `PROGRESS.md`:当前阶段改为 W3,新增 A6 完成状态与结果摘要,待办收敛为 A1-A5 + 可视化。
 - 更新 `PROJECT_LOG.md`:追加 2026-06-03 A6 流水,记录命令、产物、指标、结论和下一步进度同步。
 
@@ -60,9 +60,9 @@
 
 - 新增/重写 `PROGRESS.md`:作为当前状态快照,记录 feat_v2 pandas/Spark 产物、关键耗时、等价性结论与下一步。
 - 更新 `PROJECT_LOG.md`:追加 2026-06-02 feat_v2 流水,包括 pandas OOM 判定、Spark exact percentile 失败、`applyInPandas` 最终方案、产物结构和后续待办。
-- 新增 `src/experiments/run_p1_feature_stage.py` 并生成 `reports/p1_feature_stage_feat_v2.csv`;文档同步记录 Table 1 的 wall time、进程树 RSS、逻辑 hash 与等价性。
+- 新增 `src/experiments/run_p1_feature_stage.py` 并生成 `reports/P1/p1_feature_stage_feat_v2.csv`;文档同步记录 Table 1 的 wall time、进程树 RSS、逻辑 hash 与等价性。
 - `scripts/start_mlflow.sh` 对齐实际环境 `openpi_311`;Table 1 MLflow 记录在 server 不可用时 fallback 到本地 SQLite。
-- 扩展 `run_p1_systemwise.py` 支持 `--feature v1|v2` 与 `--cohort all|actigraphy`;生成 Table 2 主表 `reports/p1_systemwise_table2.csv` 以及 v2 actigraphy 子集补充表。
+- 扩展 `run_p1_systemwise.py` 支持 `--feature v1|v2` 与 `--cohort all|actigraphy`;生成 Table 2 主表 `reports/P1/p1_systemwise_table2.csv` 以及 v2 actigraphy 子集补充表。
 - 当前文件中的 Kaggle token 明文已替换为 `<redacted>`;历史 git 记录若曾包含该 token,应在 Kaggle 侧作废并重新生成。
 
 ---
