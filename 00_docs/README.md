@@ -4,21 +4,28 @@
 
 ## 当前快照
 
-> 更新时间:2026-06-03
-> 当前阶段:P1 W3 消融、可视化与中期汇报材料已完成;下一步可补 A1-A4 轻量消融或切入 P2 MLOps。
+> 更新时间:2026-06-11
+> 当前阶段:✅ 项目已完成。P1 多系统对比、P2 MLOps 全流程（MLflow、Optuna、FastAPI、Docker、模型发布）均已完成并验证。
 
 | 模块 | 状态 | 主要证据 |
 |---|---|---|
-| PIU 数据与切分 | 已完成 | `../data/raw/`, `../data/splits/stratified_group_kfold_seed42.csv` |
-| `feat_v1_tabular` | 已完成 | `../data/processed/feat_v1__seed42.parquet` |
-| `feat_v2_biosensing` | 已完成 | `../data/processed/feat_v2__cpu__seed42.parquet`, `../data/processed/feat_v2__spark__seed42.parquet` |
-| P1 Table 1 | 已完成 | `../reports/P1/p1_feature_stage_feat_v2.csv` |
-| P1 Table 2 | 已完成 | `../reports/P1/p1_systemwise_table2.csv` |
-| A5 覆盖率分析 | 已完成 | `../reports/P1/p1_ablation_a5_coverage.csv`, `../reports/P1/p1_ablation_a5_fold_coverage.csv` |
-| A6 Spark 并行度扫描 | 已完成 | `../reports/P1/p1_spark_parallelism_feat_v2.csv` |
-| W3 核心可视化 | 已完成 | `../reports/P1/figures/` |
-| P1 中期汇报材料 | 已完成 | `P1_MIDTERM_REPORT.md`, `P1_MIDTERM_TALK_TRACK.md`, `P1_MIDTERM_QA.md`, `../reports/P1/p1_midterm_slides.pptx`, `../reports/P1/p1_midterm_explainer.html` |
-| P2 MLOps | 设计已定,实现待推进 | `v2/04_plan_p2_v2.md` |
+| PIU 数据与切分 | ✅ 已完成 | `../data/raw/`, `../data/splits/stratified_group_kfold_seed42.csv` |
+| `feat_v1_tabular` | ✅ 已完成 | `../data/processed/feat_v1__seed42.parquet` |
+| `feat_v2_biosensing` | ✅ 已完成 | `../data/processed/feat_v2__cpu__seed42.parquet`, `../data/processed/feat_v2__spark__seed42.parquet` |
+| P1 Table 1 | ✅ 已完成 | `../reports/P1/p1_feature_stage_feat_v2.csv` |
+| P1 Table 2 | ✅ 已完成 | `../reports/P1/p1_systemwise_table2.csv` |
+| A5 覆盖率分析 | ✅ 已完成 | `../reports/P1/p1_ablation_a5_coverage.csv`, `../reports/P1/p1_ablation_a5_fold_coverage.csv` |
+| A6 Spark 并行度扫描 | ✅ 已完成 | `../reports/P1/p1_spark_parallelism_feat_v2.csv` |
+| W3 核心可视化 | ✅ 已完成 | `../reports/P1/figures/` |
+| P1 中期汇报材料 | ✅ 已完成 | `P1_MIDTERM_REPORT.md`, `P1_MIDTERM_TALK_TRACK.md`, `P1_MIDTERM_QA.md`, `../reports/P1/p1_midterm_slides.pptx`, `../reports/P1/p1_midterm_explainer.html` |
+| P2 MLflow 深度集成 | ✅ 已完成 | MLflow Tracking、Registry、可视化、Model Card 生成 |
+| P2 Baseline 注册 | ✅ 已完成 | `scripts/register_baseline.py` 及四别名体系 |
+| P2 Optuna 优化 | ✅ 已完成 | `src/experiments/run_p2_optuna.py`，支持 100-trial 自动优化 |
+| P2 Champion 选定 | ✅ 已完成 | `00_docs/CHAMPION_SELECTION_GUIDE.md` 及选型决策流程 |
+| P2 FastAPI 推理服务 | ✅ 已完成 | `src/deployment/fastapi_app.py`，5 个 API 端点，完整特征工程 |
+| P2 Docker 容器化 | ✅ 已完成 | `docker/Dockerfile.infer`、`docker/Dockerfile.train`、`docker-compose.yml` |
+| P2 模型发布 | ✅ 已完成 | `00_docs/MODEL_PUBLISHING_GUIDE.md`，ModelScope + HuggingFace 双渠道方案 |
+| P2 测试与验证 | ✅ 已完成 | `tests/test_e2e_api.py`、`docker/test_docker.sh` |
 
 最新状态以 `PROGRESS.md` 为准;流水细节看 `PROJECT_LOG.md`;文档版本变更看 `CHANGELOG.md`。
 

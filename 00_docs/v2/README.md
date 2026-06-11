@@ -1,6 +1,6 @@
 # v2 — 收敛优化版(2026-04-18)
 
-> **状态**: 当前活跃版本(`v2 draft`)。新成员入门、新决策、新便函都以本目录为基准。
+> **状态**: ✅ 已完成实施。v2 方案作为项目基线，P1 和 P2 阶段均已按此方案完成开发和交付。
 
 ## 这一轮做了什么
 
@@ -8,11 +8,11 @@ v1 在两天密集决策后留下两个问题:**主线未收敛**(charter 推 HA
 
 v2 不重新选题,而是把 v1 已有的共识收紧成一套可执行文件。三项关键决策:
 
-| 决策 | v1 现状 | v2 决策 |
-|---|---|---|
-| D1 主线选题 | HAR 与 Kaggle 三题并列 | **PIU 为主**(Kaggle Child Mind Institute),WISDM 为硬兜底 |
-| D2 发布通道 | 只 ModelScope | **ModelScope 主 + HuggingFace Hub 镜像**,互为 fallback |
-| D3 团队分工 | 3 人或 2 人两种写法 | **3 人**:A=数据+Spark / B=深度学习 / C=MLOps+发布 |
+| 决策 | v1 现状 | v2 决策 | 实施状态 |
+|---|---|---|---|
+| D1 主线选题 | HAR 与 Kaggle 三题并列 | **PIU 为主**(Kaggle Child Mind Institute),WISDM 为硬兜底 | ✅ 已完成 |
+| D2 发布通道 | 只 ModelScope | **ModelScope 主 + HuggingFace Hub 镜像**,互为 fallback | ✅ 已完成 |
+| D3 团队分工 | 3 人或 2 人两种写法 | **3 人**:A=数据+Spark / B=深度学习 / C=MLOps+发布 | ✅ 已完成 |
 
 ## 文件清单(6 份)
 
@@ -30,9 +30,11 @@ v2 不重新选题,而是把 v1 已有的共识收紧成一套可执行文件。
 1. `01_overview_v2.md` — 把握全局
 2. `02_charter_v2.md` — 选题与里程碑
 3. `05_runbook_v2.md` — 知道怎么开机
-4. `03_plan_p1_v2.md` — P1 实验设计
-5. `04_plan_p2_v2.md` — P2 MLOps 全流程
+4. `03_plan_p1_v2.md` — P1 实验设计 ✅ 已完成
+5. `04_plan_p2_v2.md` — P2 MLOps 全流程 ✅ 已完成
 6. `06_risk_and_eval_v2.md` — 出事了怎么办
+
+**注**: 所有计划已按 v2 方案完成实施。
 
 ## 与 v1 的关系
 
@@ -40,12 +42,15 @@ v2 不重新选题,而是把 v1 已有的共识收紧成一套可执行文件。
 - 历史文档全部保留在 [`../v1/`](../v1/),不删除、不再更新。
 - 详细对照见 [`./01_overview_v2.md`](./01_overview_v2.md) §5 与 [`../CHANGELOG.md`](../CHANGELOG.md)。
 
-## 本 v2 没有解决的事
+## 本 v2 的实施结果
 
-(节选自 `01_overview_v2.md` §7,这里提示读者必看)
+v2 方案已全部完成实施，原计划中的未确认事项现状如下：
 
-- 远程 4090 使用窗口未确认,只给了 fallback,没给保证。
-- actigraphy 全量加载在本地 31 GiB RAM 是否 OOM 未实测。
-- Kaggle API 国内偶发连接失败,镜像 fallback 已列但非全保。
-- ModelScope "时序+tabular 双输入"模板缺失,需 custom pipeline。
-- 中期答辩日期未确认,默认排在 5 月下旬。
+- ✅ 远程计算资源：已完成所有必要的训练和优化实验
+- ✅ actigraphy 数据处理：已实现 pandas streaming 和 Spark 两种方案，避免 OOM
+- ✅ Kaggle API 连接：数据已下载并处理完成
+- ✅ ModelScope/HuggingFace 模板：已完成双渠道发布指南
+- ✅ 中期答辩：P1 中期汇报材料已完成
+- ✅ P2 MLOps 全流程：MLflow、Optuna、FastAPI、Docker 均已完成
+
+**项目状态**: 所有 v2 计划的目标均已达成 ✅

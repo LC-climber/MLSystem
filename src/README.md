@@ -1,6 +1,6 @@
 # src/ — 源代码目录说明
 
-本目录是 PIU 项目的 Python 包源码,包名为 `src`。当前实现重点在 P1:同一 PIU 风险识别任务下的 sklearn / Spark / PyTorch 多系统对比、actigraphy 特征阶段对比、A5/A6 消融和可视化。P2 MLOps 相关目录已经预留,但尚未达到 P1 的实现完整度。
+本目录是 PIU 项目的 Python 包源码,包名为 `src`。P1 多系统对比和 P2 MLOps 全流程均已完成实现，包括数据处理、模型训练、实验脚本、MLflow 集成、FastAPI 部署和完整测试。
 
 ## 顶层文件
 
@@ -14,14 +14,14 @@
 
 | 目录 | 当前角色 | 状态 |
 |---|---|---|
-| `data/` | PIU 数据常量、加载、切分、tabular 特征、actigraphy 特征和 feat_v1/feat_v2 构建。 | P1 已落地 |
-| `models/` | 统一模型接口和 sklearn / Spark / PyTorch baseline。 | P1 已落地 |
-| `training/` | 共享 5-fold CV 训练评估循环,保证三系统公平对比。 | P1 已落地 |
-| `evaluation/` | 分类指标实现:Macro-F1、QWK、Balanced Accuracy、Log Loss 和 CV 汇总。 | P1/P2 共用 |
-| `experiments/` | P1 实验入口脚本:系统对比、特征阶段对比、A5/A6、可视化。 | P1 已落地 |
-| `utils/` | I/O、日志、随机种子、系统指标、Spark 会话等通用工具。 | P1 已落地 |
-| `mlflow_utils/` | MLflow 工具预留目录。 | 占位 |
-| `deployment/` | FastAPI / 模型发布代码预留目录。 | P2 占位 |
+| `data/` | PIU 数据常量、加载、切分、tabular 特征、actigraphy 特征和 feat_v1/feat_v2 构建。 | ✅ P1 已完成 |
+| `models/` | 统一模型接口和 sklearn / Spark / PyTorch baseline。 | ✅ P1 已完成 |
+| `training/` | 共享 5-fold CV 训练评估循环,保证三系统公平对比。 | ✅ P1 已完成 |
+| `evaluation/` | 分类指标实现:Macro-F1、QWK、Balanced Accuracy、Log Loss 和 CV 汇总。 | ✅ P1/P2 完成 |
+| `experiments/` | P1 实验入口脚本:系统对比、特征阶段对比、A5/A6、可视化；P2 Optuna 优化。 | ✅ P1/P2 已完成 |
+| `utils/` | I/O、日志、随机种子、系统指标、Spark 会话等通用工具。 | ✅ P1 已完成 |
+| `mlflow_utils/` | MLflow Tracking、Registry、可视化、Model Card 生成等工具。 | ✅ P2 已完成 |
+| `deployment/` | FastAPI 推理服务、模型加载、特征工程、健康检查等部署代码。 | ✅ P2 已完成 |
 | `scripts/` | Python package 占位目录。根目录 shell 脚本在 `../scripts/`。 | 占位 |
 
 `__pycache__/` 是 Python 运行缓存,不是项目源码,不用维护。
@@ -116,15 +116,36 @@ python -m src.experiments.run_p1_visualizations
 | `spark.py` | SparkSession 单例与环境修正:固定 Java 版本、Python worker、local IP、driver memory 等。 |
 | `__init__.py` | package 标记。 |
 
-## mlflow_utils/、deployment/、scripts/
+## mlflow_utils/
 
-这些目录目前主要是 P2 预留结构:
+| 文件 | 作用 |
+|---|---|
+| `tracking.py` | MLflow Tracking 工具:实验记录、参数/指标/artifact 日志、可视化图表上传。 |
+| `registry.py` | MLflow Registry 工具:模型注册、别名管理、版本查询、模型加载。 |
+| `model_card.py` | Model Card 生成:自动生成包含指标、特征、超参数的模型文档。 |
+| `visualizations.py` | MLflow 可视化:混淆矩阵、ROC 曲线、学习曲线等图表生成。 |
+| `__init__.py` | package 标记。 |
 
-- `mlflow_utils/`:后续可放 MLflow Tracking / Registry / artifact 工具。
-- `deployment/`:后续可放 FastAPI 服务、推理 schema、模型加载和发布适配代码。
-- `scripts/`:目前只是 Python package 占位;根目录已有 shell 与构建脚本在 `../scripts/`。
+P2 MLflow 深度集成已完成,支持完整的实验追踪、模型注册、四别名体系（baseline/candidate/champion/archive）和自动文档生成。
 
-如果开始实现 P2,建议先补齐 `mlflow_utils/` 与 `deployment/` 的 README 或模块 docstring,再引入具体代码,避免和 P1 实验入口混在一起。
+## deployment/
+
+| 文件 | 作用 |
+|---|---|
+| `fastapi_app.py` | FastAPI 推理服务主入口:5 个 API 端点（/health、/predict、/model_info 等）。 |
+| `feature_engineering.py` | 部署用特征工程:与训练时特征处理保持一致的推理时特征准备。 |
+| `model_loader.py` | 模型加载工具:从 MLflow Registry 按别名加载模型。 |
+| `README.md` | FastAPI 服务文档:端点说明、使用示例、部署建议。 |
+| `__init__.py` | package 标记。 |
+
+P2 FastAPI 推理服务已完成,支持健康检查、模型信息查询、单样本/批量预测、模型热重载等功能。
+
+## scripts/
+
+这个目录目前主要是 Python package 占位;根目录已有 shell 与构建脚本在 `../scripts/`，包括：
+- `register_baseline.py`:Baseline 模型批量注册脚本
+- `test_docker.sh`:Docker 镜像构建和测试脚本
+- 其他辅助工具脚本
 
 ## 当前数据流
 
