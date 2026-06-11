@@ -1,16 +1,35 @@
 # P2 Reports
 
-P2 阶段（MLOps 实践）的分析报告和交付物已完成。
+P2 阶段（MLOps 实践）已完成代码实现，数据存储在数据库中。
 
-## 已完成的 P2 产物
+## P2 数据位置
 
-| 类型 | 文件 | 状态 | 说明 |
-| --- | --- | --- | --- |
-| Optuna 汇总 | `p2_optuna_trials.csv`, `p2_optuna_best_trial.md` | ✅ 已完成 | 记录 trial 排名、best params、目标指标和搜索空间结论 |
-| 模型注册 | `p2_model_registry_summary.md` | ✅ 已完成 | 记录候选模型、版本、注册状态和选择理由 |
-| 部署评估 | `p2_deployment_eval.csv`, `p2_api_smoke_report.md` | ✅ 已完成 | 记录 API 延迟、吞吐、错误样例和 smoke test 结果 |
-| 监控分析 | `p2_monitoring_report.md` | ✅ 已完成 | 记录输入分布、预测分布、漂移风险和告警阈值 |
-| 最终验收 | `p2_final_report.md` | ✅ 已完成 | 汇总 MLOps 流程、关键指标、复现实验入口和遗留风险 |
+P2 阶段的实验数据和模型信息存储在以下位置：
+
+| 类型 | 位置 | 说明 |
+| --- | --- | --- |
+| Optuna 优化记录 | `../../src/optuna.db` | SQLite 数据库，包含所有 trial 的超参数和结果 |
+| MLflow 实验追踪 | `../../mlruns/` | MLflow 数据目录，包含实验、运行、指标和 artifacts |
+| MLflow 模型注册 | `../../mlruns/models/` | 注册的模型版本和元数据 |
+
+## 可选：导出报告文件
+
+如需生成可读的报告文件，可运行以下脚本：
+
+```bash
+# 导出 Optuna trials
+python -c "
+import sqlite3
+import pandas as pd
+conn = sqlite3.connect('../../src/optuna.db')
+df = pd.read_sql_query('SELECT * FROM trials', conn)
+df.to_csv('p2_optuna_trials.csv', index=False)
+print(f'Exported {len(df)} trials')
+"
+
+# 查看 MLflow 实验
+mlflow ui --backend-store-uri file://../../mlruns
+```
 
 ## P2 关键成果
 
@@ -43,9 +62,15 @@ P2 阶段（MLOps 实践）的分析报告和交付物已完成。
 - 28 项发布清单
 - 完整的发布指南文档
 
-## 报告位置
+## 报告位置说明
 
-当前目录作为 P2 报告落点。所有实验输出（Optuna trials、部署评估、监控分析等）均已自动导出到此目录或相关位置。
+**当前状态**：P2 代码实现已完成，实验数据存储在数据库中（Optuna DB 和 MLflow），但尚未导出为独立的报告文件（如 P1 的 CSV 和图表）。
+
+**与 P1 的区别**：
+- P1：有独立的 CSV、图表、PPT 等静态报告文件
+- P2：数据存储在 Optuna DB 和 MLflow 中，通过工具查询和可视化
+
+如需生成类似 P1 的报告文件，可以添加导出脚本将数据库内容导出为 CSV/Markdown。
 
 相关文档：
 - 技术指南：`../../00_docs/v2/04_plan_p2_v2.md`
