@@ -5,6 +5,7 @@ This module defines all global constants, paths, and hyperparameters
 used across the project to ensure consistency and reproducibility.
 """
 
+import os
 from pathlib import Path
 
 # ============================================================================
@@ -31,7 +32,10 @@ NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 # ============================================================================
 # MLflow Configuration
 # ============================================================================
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+MLFLOW_TRACKING_URI = os.environ.get(
+    "MLFLOW_TRACKING_URI",
+    f"sqlite:///{PROJECT_ROOT / 'mlruns.db'}",
+)
 MLFLOW_EXPERIMENT_P1 = "piu-p1-systemwise"
 MLFLOW_EXPERIMENT_P2 = "piu-p2-mlops"
 
@@ -155,5 +159,5 @@ FASTAPI_PORT = 8000
 REGISTRY_ALIASES = ["baseline", "candidate", "champion", "demo"]
 
 # Publishing
-MODELSCOPE_REPO = "mlsys-2026s/piu-risk-classifier"
+MODELSCOPE_REPO = "ICTclimber/piu-risk-classifier"  # published 2026-06-12 (champion v9)
 HUGGINGFACE_REPO = "mlsys-2026s/piu-risk-classifier"

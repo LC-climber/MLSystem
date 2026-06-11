@@ -17,8 +17,6 @@ from src.models.sklearn_baselines import SklearnLogisticRegression
 from src.data.feature_engineering import load_feat_v1
 from src.data.splits import load_fold_assignment
 from src.data.constants import ID_COL, TARGET_COL
-from src.mlflow_utils.registry import register_model_with_alias
-from src.mlflow_utils.artifacts import generate_model_card
 import numpy as np
 import pandas as pd
 import logging

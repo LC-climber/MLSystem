@@ -1,0 +1,32 @@
+artifact_path: model
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.14
+    streamable: false
+mlflow_version: 2.17.0
+model_size_bytes: 12446
+model_uuid: 6e72374f50c4456fab499a206f0c03e1
+run_id: fb3b8a0a33254912aa0a0756f7e23ccc
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "age", "required": true}, {"type": "double",
+    "name": "sex", "required": true}, {"type": "double", "name": "bmi", "required":
+    true}, {"type": "double", "name": "height", "required": true}, {"type": "double",
+    "name": "weight", "required": true}, {"type": "double", "name": "cgas_score",
+    "required": true}]'
+  outputs: '[{"type": "long", "name": "prediction", "required": true}, {"type": "array",
+    "items": {"type": "double"}, "name": "probabilities", "required": true}, {"type":
+    "double", "name": "confidence", "required": true}]'
+  params: null
+utc_time_created: '2026-06-11 16:12:41.496774'

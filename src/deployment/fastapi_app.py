@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import mlflow
 import numpy as np
+import pandas as pd
 import logging
 from typing import Optional
 
@@ -121,6 +122,13 @@ def prepare_features(request: PredictionRequest) -> np.ndarray:
     return np.array([features])
 
 
+def request_to_model_input(request: PredictionRequest) -> dict:
+    """Convert the API schema to the pyfunc model's request dictionary."""
+    if hasattr(request, "model_dump"):
+        return request.model_dump(exclude_none=True)
+    return request.dict(exclude_none=True)
+
+
 @app.get("/", tags=["Root"])
 async def root():
     """根端点"""
@@ -169,12 +177,21 @@ async def predict(request: PredictionRequest):
         raise HTTPException(status_code=503, detail="Model not loaded")
 
     try:
-        # 准备特征
-        features = prepare_features(request)
+        model_input = pd.DataFrame([request_to_model_input(request)])
+        raw_prediction = _model.predict(model_input)
 
-        # 预测
-        prediction = _model.predict(features)[0]
-        probabilities = _model.predict_proba(features)[0].tolist()
+        if isinstance(raw_prediction, pd.DataFrame):
+            row = raw_prediction.iloc[0].to_dict()
+            prediction = int(row["prediction"])
+            probabilities = row["probabilities"]
+            confidence = float(row["confidence"])
+        else:
+            prediction = int(raw_prediction[0])
+            probabilities = [0.0, 0.0, 0.0, 0.0]
+            probabilities[prediction] = 1.0
+            confidence = 1.0
+
+        probabilities = [float(p) for p in probabilities]
         confidence = float(max(probabilities))
 
         # 映射到标签

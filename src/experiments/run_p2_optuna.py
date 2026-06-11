@@ -7,10 +7,6 @@ P2 Optuna 超参数优化实验
 import sys
 from pathlib import Path
 
-# 添加项目根目录到路径
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
 import argparse
 import numpy as np
 import mlflow
@@ -20,6 +16,13 @@ import logging
 from typing import Dict, Any
 
 import pandas as pd
+import torch
+
+# 添加项目根目录到路径
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+OPTUNA_DB_PATH = PROJECT_ROOT / "src" / "optuna.db"
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.data.feature_engineering import load_feat_v1, load_feat_v2
 from src.data.splits import load_fold_assignment
 from src.training.cv import run_cv
@@ -81,21 +84,23 @@ def objective(
     max_epochs = 100
     patience = 10
 
-    # 创建模型实例
     num_classes = len(TARGET_CLASSES)
-    model = ConfigurableTorchMLP(
-        num_classes=num_classes,
-        hidden_dim_1=hidden_dim_1,
-        hidden_dim_2=hidden_dim_2,
-        dropout=dropout,
-        learning_rate=lr,
-        weight_decay=weight_decay,
-        batch_size=batch_size,
-        max_epochs=max_epochs,
-        patience=patience,
-        device="cuda",
-        seed=SEED,
-    )
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    def model_factory() -> ConfigurableTorchMLP:
+        return ConfigurableTorchMLP(
+            num_classes=num_classes,
+            hidden_dim_1=hidden_dim_1,
+            hidden_dim_2=hidden_dim_2,
+            dropout=dropout,
+            learning_rate=lr,
+            weight_decay=weight_decay,
+            batch_size=batch_size,
+            max_epochs=max_epochs,
+            patience=patience,
+            device=device,
+            seed=SEED,
+        )
 
     # 启动 MLflow run
     with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}"):
@@ -107,14 +112,15 @@ def objective(
             "model_type": "pytorch_mlp",
             "max_epochs": max_epochs,
             "patience": patience,
+            "device": device,
         })
         mlflow.set_tag("optuna_study", trial.study.study_name)
 
         try:
             # 运行 CV（使用 P1 的 run_cv 接口）
             results = run_cv(
-                model_factory=lambda: model,
-                feat_df=merged,
+                model_factory=model_factory,
+                feat_df=merged.drop(columns=["fold"]),
                 assignment=merged[[ID_COL, 'fold', TARGET_COL]],
                 n_splits=n_folds,
                 seed=SEED,
@@ -122,11 +128,13 @@ def objective(
                 measure_system=False,  # 减少开销
             )
 
-            # 提取指标（从 results 字典中）
-            # run_cv 返回格式：{'metrics': {'qwk_mean': ..., 'qwk_std': ...}, ...}
-            metrics = results.get('metrics', results)  # 兼容不同返回格式
+            # run_cv returns {'model_name', 'per_fold', 'summary'}.
+            # The previous top-level lookup silently converted every trial QWK to 0.0.
+            metrics = results.get("summary")
+            if not metrics:
+                raise KeyError(f"CV summary missing from run_cv result: {results.keys()}")
 
-            qwk_mean = metrics.get('qwk_mean', metrics.get('qwk', 0.0))
+            qwk_mean = metrics['qwk_mean']
             qwk_std = metrics.get('qwk_std', 0.0)
             macro_f1_mean = metrics.get('macro_f1_mean', metrics.get('macro_f1', 0.0))
             balanced_accuracy_mean = metrics.get('balanced_accuracy_mean', metrics.get('balanced_accuracy', 0.0))
@@ -217,11 +225,11 @@ def run_optuna_optimization(
         study_name=study_name,
         direction="maximize",  # 最大化 QWK
         pruner=MedianPruner(n_startup_trials=10, n_warmup_steps=0),
-        storage=f"sqlite:///{project_root}/optuna.db",
+        storage=f"sqlite:///{OPTUNA_DB_PATH}",
         load_if_exists=True,
     )
 
-    logger.info(f"Study storage: sqlite:///{project_root}/optuna.db")
+    logger.info(f"Study storage: sqlite:///{OPTUNA_DB_PATH}")
 
     # 启动父 MLflow run
     with mlflow.start_run(run_name=f"optuna_{study_name}"):

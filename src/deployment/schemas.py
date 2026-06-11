@@ -86,6 +86,7 @@ class ModelInfo(BaseModel):
     n_features: int = Field(..., description="特征数量")
 
     class Config:
+        protected_namespaces = ()
         json_schema_extra = {
             "example": {
                 "model_name": "piu-risk",
@@ -111,6 +112,7 @@ class HealthResponse(BaseModel):
     model_name: Optional[str] = Field(None, description="当前加载的模型名称")
 
     class Config:
+        protected_namespaces = ()
         json_schema_extra = {
             "example": {
                 "status": "healthy",

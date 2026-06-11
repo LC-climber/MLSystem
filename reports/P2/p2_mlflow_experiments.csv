@@ -1,0 +1,4 @@
+experiment_id,name,artifact_location,lifecycle_stage,total_runs,finished_runs,failed_runs
+0,Default,/home/er/桌面/MLsystem/mlruns_artifacts/0,active,0,0,0
+1,piu-p1-systemwise,/home/er/桌面/MLsystem/mlruns_artifacts/1,active,29,29,0
+2,piu-p2-mlops,/home/er/桌面/MLsystem/mlruns_artifacts/2,active,58,39,19

@@ -1,197 +1,71 @@
 # MLsystem - PIU Risk Classification MLOps Project
 
-**项目状态**: ✅ 已完成（100%）  
 **最后更新**: 2026-06-11
+**当前状态**: P1 完成；P2 本地可复现 MLOps 流程完成。
 
----
+## 项目概览
 
-## 📊 项目概览
+本项目面向 Kaggle Child Mind Institute PIU 风险分类任务，包含两个阶段：
 
-本项目实现了一个完整的 MLOps 系统，用于青少年网络成瘾（PIU）风险评估。
+- P1: 多系统对比，已生成可复现实验表格、图表和中期汇报材料。
+- P2: MLOps 实践，已完成本地 MLflow/Optuna/Registry/FastAPI-compatible model/artifact/report/visualization 证据链。
 
-### 关键指标
-- **当前进度**: 100% ✅
-- **代码量**: 3,800+ 行
-- **文档量**: 7,000+ 行
-- **测试覆盖**: E2E + Docker
-- **项目健康度**: 5.0/5.0 ⭐⭐⭐⭐⭐
+## P2 关键结果
 
----
+- Formal study: `p2-formal-mlops-20260612`
+- Formal Optuna search: 10 local trials, 5-fold CV
+- Baseline: `baseline_logreg_v1`, QWK `0.3651`
+- Champion: `candidate_logreg_v1`, QWK `0.3672`
+- Registry aliases: `baseline -> v7`, `candidate -> v8`, `champion -> v9`
+- Champion URI: `models:/piu-risk@champion`
 
-## 🏗️ 系统架构
+主要报告和图表：
 
-```
-数据 → 特征工程 → 训练 → MLflow → 
-Registry → FastAPI → Docker → 发布
-```
+- [P2 final report](/home/er/桌面/MLsystem/reports/P2/p2_final_report.md)
+- [P2 audit summary](/home/er/桌面/MLsystem/reports/P2/p2_summary_report.md)
+- [metric comparison](/home/er/桌面/MLsystem/reports/P2/figures/p2_metric_comparison.png)
+- [Optuna trace](/home/er/桌面/MLsystem/reports/P2/figures/p2_optuna_trace.png)
+- [champion confusion matrix](/home/er/桌面/MLsystem/reports/P2/figures/p2_champion_confusion_matrix.png)
+- [MLflow run status](/home/er/桌面/MLsystem/reports/P2/figures/p2_mlflow_run_status.png)
 
-### 核心组件
-1. **MLflow 深度集成** - 实验追踪、模型注册、文档生成
-2. **Optuna 优化框架** - 自动超参数优化
-3. **FastAPI 推理服务** - REST API 推理接口
-4. **Docker 容器化** - 完整的容器化部署
-5. **双渠道发布** - ModelScope + HuggingFace Hub
+## 常用命令
 
----
-
-## 🚀 快速开始
-
-### 1. 环境配置
-```bash
-# 克隆仓库
-git clone https://github.com/LC-climber/MLSystem.git
-cd MLsystem
-
-# 创建环境
-conda create -n mlsystem python=3.11
-conda activate mlsystem
-
-# 安装依赖
-pip install -r requirements.txt
-```
-
-### 2. 启动服务（Docker）
-```bash
-cd docker
-docker-compose up -d
-```
-
-### 3. 访问服务
-- **FastAPI**: http://localhost:8000
-- **MLflow**: http://localhost:5000
-- **API 文档**: http://localhost:8000/docs
-
----
-
-## 📁 项目结构
-
-```
-MLsystem/
-├── src/                    # 源代码
-│   ├── data/              # 数据处理
-│   ├── models/            # 模型定义
-│   ├── experiments/       # 实验脚本
-│   ├── deployment/        # 部署代码
-│   ├── mlflow_utils/      # MLflow 工具
-│   └── training/          # 训练流程
-├── scripts/               # 工具脚本
-├── tests/                 # 测试代码
-├── docker/                # Docker 配置
-├── 00_docs/              # 文档
-├── data/                  # 数据目录
-└── models/                # 模型存储
-```
-
----
-
-## 🎯 主要功能
-
-### 1. 模型训练
 ```bash
 # P1 多系统对比
 python -m src.experiments.run_p1_systemwise
 
-# P2 Optuna 优化
-python -m src.experiments.run_p2_optuna \
-  --feature v2 --trials 100 --folds 5
+# P2 完整管道
+python -m src.experiments.run_p2_full_pipeline \
+  --trials 10 --folds 5 --study-name p2-formal-mlops-20260612
+
+# 导出 P2 审计报告
+python scripts/export_p2_reports.py
+
+# 加载 champion 验证
+python - <<'PY'
+import mlflow, pandas as pd
+from src.config import MLFLOW_TRACKING_URI
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+model = mlflow.pyfunc.load_model("models:/piu-risk@champion")
+print(model.predict(pd.DataFrame([{"age": 12.5, "sex": 1.0, "bmi": 18.5}])))
+PY
 ```
 
-### 2. 模型注册
-```bash
-# 注册 Baseline
-python scripts/register_baseline.py
+## 项目结构
+
+```text
+MLsystem/
+├── src/                    # 数据、模型、实验、部署和 MLOps 代码
+├── scripts/                # 报告导出和工具脚本
+├── tests/                  # 测试代码
+├── docker/                 # Docker 配置
+├── reports/P1/             # P1 静态报告产物
+├── reports/P2/             # P2 结果、图表、模型副本和审计导出
+├── mlruns.db               # MLflow SQLite backend
+├── mlruns_artifacts/       # MLflow artifacts
+└── 00_docs/                # 计划、过程记录和归档文档
 ```
 
-### 3. 推理服务
-```bash
-# 启动服务
-uvicorn src.deployment.fastapi_app:app --reload
+## 解释口径
 
-# 测试预测
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"age": 12.5, "sex": 1, "bmi": 18.5}'
-```
-
-### 4. 测试
-```bash
-# Docker 测试
-bash docker/test_docker.sh
-
-# E2E 测试
-python tests/test_e2e_api.py
-```
-
----
-
-## 📊 模型性能
-
-### P1 Baseline (sklearn LR)
-- **QWK**: 0.3651
-- **Macro F1**: 0.362
-- **Balanced Accuracy**: 0.404
-- **特征**: feat_v1 (100维)
-
----
-
-## 📚 文档
-
-### 核心文档
-- [项目状态报告](PROJECT_STATUS_REPORT_20260608.md)
-- [最终总结](FINAL_SUMMARY_20260608.md)
-- [实施计划](00_docs/P2_IMPLEMENTATION_PLAN.md)
-- [下一步指南](00_docs/NEXT_STEPS.md)
-
-### 技术文档
-- [FastAPI 文档](src/deployment/README.md)
-- [Docker 部署](docker/README.md)
-- [模型发布指南](00_docs/MODEL_PUBLISHING_GUIDE.md)
-
----
-
-## 🛠️ 技术栈
-
-### 机器学习
-- PyTorch 2.9.0
-- scikit-learn 1.3.0
-- Optuna 3.4.0
-
-### MLOps
-- MLflow 2.8.1
-- FastAPI 0.104.1
-- Docker & docker-compose
-
----
-
-## 📈 进度追踪
-
-**当前进度**: ████████████████████ 100% ✅
-
-### 已完成
-- ✅ P1: 多系统对比 (100%)
-- ✅ P2-1: MLflow 深度集成 (100%)
-- ✅ P2-2: Baseline 注册 (100%)
-- ✅ P2-3: Optuna 优化框架 (100%)
-- ✅ P2-4: Champion 选定 (100%)
-- ✅ P2-5: FastAPI 推理服务 (100%)
-- ✅ P2-6: Docker 容器化 (100%)
-- ✅ P2-7: 模型发布 (100%)
-- ✅ 最终报告与文档整理 (100%)
-
----
-
-## 🤝 贡献
-
-本项目为学术项目，当前不接受外部贡献。
-
----
-
-## 📄 许可证
-
-本项目用于学术研究，代码遵循 MIT 许可证。
-
----
-
-**最后更新**: 2026-06-11  
-**项目状态**: 已完成 ✅ ⭐⭐⭐⭐⭐  
-**完成时间**: 2026-06-11
+P2 的主要价值是完成 MLOps 闭环，而不是大幅提升模型性能。Champion 相比 baseline 的 QWK 提升为 `+0.0022`，应如实汇报为小幅调参收益。

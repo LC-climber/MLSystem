@@ -1,0 +1,10 @@
+name,version,current_stage,run_id,status,source,alias
+piu-risk,1,None,56a337d24ca242df8b06a3c4630e2a86,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/56a337d24ca242df8b06a3c4630e2a86/artifacts/model,
+piu-risk,2,None,0d72927095314f10ad01fb48918514ef,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/0d72927095314f10ad01fb48918514ef/artifacts/model,
+piu-risk,3,None,874d87fe09134b9db077cc04a7e26058,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/874d87fe09134b9db077cc04a7e26058/artifacts/model,
+piu-risk,4,None,fa8833a04a484c51b31301647c259f3e,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/fa8833a04a484c51b31301647c259f3e/artifacts/model,
+piu-risk,5,None,38a84c70cd79404db8e9aec9ceec99f0,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/38a84c70cd79404db8e9aec9ceec99f0/artifacts/model,
+piu-risk,6,None,fb3b8a0a33254912aa0a0756f7e23ccc,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/fb3b8a0a33254912aa0a0756f7e23ccc/artifacts/model,
+piu-risk,7,None,184c9fb21d574d719083de5fa59a0fbc,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/184c9fb21d574d719083de5fa59a0fbc/artifacts/model,baseline
+piu-risk,8,None,929d18a2b14141e091b0fb455a0e0edf,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/929d18a2b14141e091b0fb455a0e0edf/artifacts/model,candidate
+piu-risk,9,None,aaa3f998fb0e4ce5bdb43dece2158468,READY,/home/er/桌面/MLsystem/mlruns_artifacts/2/aaa3f998fb0e4ce5bdb43dece2158468/artifacts/model,champion

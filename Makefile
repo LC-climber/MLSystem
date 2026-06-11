@@ -55,7 +55,7 @@ train-p1:
 
 train-p2:
 	@echo "Running P2 MLOps pipeline..."
-	conda run -n mlsys_gpu_local python -m src.experiments.run_p2_baseline
+	python -m src.experiments.run_p2_full_pipeline --trials 10 --folds 5 --study-name p2-formal-mlops-20260612
 
 # Evaluation
 evaluate:

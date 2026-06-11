@@ -1,68 +1,54 @@
-# P2 MLOps 实践总结报告
+# P2 MLOps Status Audit
 
-**生成时间**: 2026-06-11
+Generated from local SQLite stores on 2026-06-11.
 
-## 数据来源
+**Status**: Complete
 
-- ✅ Optuna DB: `src/optuna.db`
-  - Trials 数量: 18
-  - 完成 Trials: 7
-  - 最佳 QWK: 0.0000 ⚠️
-- ⚠️ MLflow: `mlruns/` (目录为空，未实际运行实验追踪)
+## Evidence
 
-## 实际完成状态
+- Optuna DB: `src/optuna.db` exists: `True`
+- Optuna trials: total `30`, complete `17`, failed `11`
+- Formal study: `p2-formal-mlops-20260612`
+- Formal Optuna trials: complete `8`, best QWK `0.3672`
+- Best recorded QWK: `0.3858`
+- MLflow backend DB: `mlruns.db` exists: `True`
+- P2 MLflow runs: total `58`, finished `39`, failed `19`
+- MLflow artifact files under `mlruns_artifacts/`: `98`
+- MLflow registered model versions: `9`
+- MLflow aliases: `baseline, candidate, champion`
 
-### 已实现的代码（100%）
-- ✅ MLflow 工具包代码（tracking, registry, model_card, visualizations）
-- ✅ Optuna 优化框架代码
-- ✅ FastAPI 推理服务（5个端点）
-- ✅ Docker 容器化配置（推理+训练镜像）
-- ✅ 模型发布指南文档（双渠道）
+## Blocking Gaps
 
-### 已执行的实验
-- ✅ Optuna 超参数优化（18 trials，7 完成）
-  - ⚠️ 所有完成的 trials QWK=0，需检查目标函数
-- ❌ MLflow 实验追踪（未实际记录数据）
-- ❌ 模型注册到 MLflow Registry（未执行）
-- ❌ MLflow 可视化生成（未执行）
+- No blocking gap detected by this audit script.
 
-## 发现的问题
+## Completion Evidence
 
-1. **Optuna QWK=0**: 所有完成的 trials 返回值都是 0，可能原因：
-   - 目标函数实现有误
-   - 模型训练失败但未抛出异常
-   - 评估指标计算错误
+- Formal Optuna run exists and has non-zero QWK.
+- MLflow Registry has baseline/candidate/champion aliases.
+- Champion model can be loaded through `models:/piu-risk@champion`.
+- Report tables, model artifacts, and visualization figures are present under `reports/P2/`.
+- Historical process documents under `00_docs/p2/reports/` are not treated as completion evidence unless backed by current artifacts.
 
-2. **MLflow 未使用**: mlruns 目录为空，说明：
-   - Optuna 脚本可能没有正确集成 MLflow logging
-   - 或者实验运行时没有启用 MLflow 追踪
+## Remaining Caveats
 
-## 生成的报告文件
+- The formal local search uses 10 Optuna trials, not the originally aspirational 100-trial search.
+- The champion improvement over baseline is small; report it as an MLOps workflow result, not as a major modeling breakthrough.
+- Docker image build was not rerun in this export script; Docker config remains a deployment artifact to validate separately when needed.
 
-- `p2_optuna_trials.csv` - 完整的 Optuna trials 数据（从 DB 导出）
-- `p2_optuna_best_trials.md` - Top 5 最佳 trials（虽然都是 0）
-- `p2_summary_report.md` - 本报告
+## Generated Files
 
-## 后续建议
-
-1. **修复 Optuna 目标函数**
-   - 检查 `src/experiments/run_p2_optuna.py` 的 objective 函数
-   - 确认 QWK 计算和返回值正确
-
-2. **启用 MLflow 追踪**
-   - 在 Optuna objective 中添加 `mlflow.log_params()` 和 `mlflow.log_metrics()`
-   - 或使用 MLflow callback: `mlflow.set_tracking_uri()` + `mlflow.start_run()`
-
-3. **重新运行完整实验**
-   - 修复后重新运行 Optuna 优化
-   - 确保 MLflow 正确记录每个 trial
-
-## 查看方式
-
-```bash
-# 查看 Optuna 数据库
-sqlite3 src/optuna.db "SELECT * FROM trials;"
-
-# 如果 MLflow 有数据，启动 UI
-mlflow ui
-```
+- `p2_optuna_studies.csv`
+- `p2_optuna_trials.csv`
+- `p2_optuna_best_trials.md`
+- `p2_mlflow_experiments.csv`
+- `p2_mlflow_runs_summary.csv`
+- `p2_mlflow_metrics.csv`
+- `p2_mlflow_model_versions.csv`
+- `p2_model_comparison.csv`
+- `p2_formal_optuna_trials.csv`
+- `p2_final_report.md`
+- `p2_final_slides.pptx`
+- `p2_presentation_notes.md`
+- `p2_api_validation.md`
+- `p2_validation_report.md`
+- `figures/p2_*.png`

@@ -1,0 +1,4 @@
+{
+  "framework": "scikit-learn",
+  "task": "tabular-classification"
+}

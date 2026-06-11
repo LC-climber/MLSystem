@@ -1,0 +1,7 @@
+study_id,study_name,direction,total_trials,complete_trials,failed_trials,best_value
+1,minimal-test,MAXIMIZE,7,0,7,
+2,quick-test-v3,MAXIMIZE,6,2,4,0.0
+3,test-5trials-30epochs,MAXIMIZE,5,5,0,0.0
+4,p2-smoke-pipeline,MAXIMIZE,1,1,0,0.30191851544388354
+5,p2-smoke-pipeline-2,MAXIMIZE,1,1,0,0.3857878210373799
+6,p2-formal-mlops-20260612,MAXIMIZE,10,8,0,0.36721577316187914
